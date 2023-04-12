@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
 
     'accounts',
+    'reservation',
 ]
 
 SITE_ID = 1
