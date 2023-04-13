@@ -7,6 +7,7 @@ from reservation.models import Restaurant, Table
 @receiver(post_save, sender=CustomUser)
 def create_restaurant(sender, instance, created, **kwargs):
     if created and instance.is_restaurant:
+        print("Creating restaurant and tables...")
         restaurant = Restaurant.objects.create(owner=instance,
                                                name=instance.restaurant_name,
                                                address=instance.restaurant_address,
@@ -14,3 +15,4 @@ def create_restaurant(sender, instance, created, **kwargs):
         table_2 = Table.objects.create(restaurant=restaurant, capacity=2)
         table_4 = Table.objects.create(restaurant=restaurant, capacity=4)
         table_more = Table.objects.create(restaurant=restaurant, capacity=6)
+        print("Created restaurant and tables.")
