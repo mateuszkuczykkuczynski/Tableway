@@ -20,8 +20,10 @@ from django.urls import path, include, re_path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
+    path("api/v1/", include("reservation.urls")),
     re_path(r'^rest-auth/', include('rest_auth.urls')),
     re_path(r'^rest-auth/registration/', include('rest_auth.registration.urls'))
+
     # path("api/v1/dj-rest-auth/", include("dj_rest_auth.urls")),
     # path("api/v1/dj-rest-auth/registration/", include("dj_rest_auth.registration.urls")),
     # path("rest-auth/registration/name-registration/", NameRegistrationView.as_view(), name="rest_name_register")
