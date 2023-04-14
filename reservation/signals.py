@@ -12,7 +12,20 @@ def create_restaurant(sender, instance, created, **kwargs):
                                                name=instance.restaurant_name,
                                                address=instance.restaurant_address,
                                                restaurant_type=instance.restaurant_type)
-        table_2 = Table.objects.create(restaurant=restaurant, capacity=2)
-        table_4 = Table.objects.create(restaurant=restaurant, capacity=4)
-        table_more = Table.objects.create(restaurant=restaurant, capacity=6)
+        for i in range(instance.two_seats_tables):
+            table_2 = Table.objects.create(location=restaurant, capacity=2)
+        for i in range(instance.four_seats_tables):
+            table_4 = Table.objects.create(location=restaurant, capacity=4)
+        for i in range(instance.more_than_four_seats_tables):
+            table_more = Table.objects.create(location=restaurant, capacity=6)
         print("Created restaurant and tables.")
+
+
+@receiver(post_save, sender=CustomUser)
+def save_restaurant_and_tables(sender, instance, **kwargs):
+    # if instance.is_restaurant:
+    instance.restaurant.save()
+    for table in instance.restaurant.restaurant_tables.all():
+        table.save()
+
+
