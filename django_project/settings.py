@@ -47,8 +47,6 @@ INSTALLED_APPS = [
 
     'accounts',
     'reservation',
-
-
 ]
 
 SITE_ID = 1
