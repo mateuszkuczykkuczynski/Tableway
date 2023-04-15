@@ -11,7 +11,9 @@ def create_restaurant(sender, instance, created, **kwargs):
         restaurant = Restaurant.objects.create(owner=instance,
                                                name=instance.restaurant_name,
                                                address=instance.restaurant_address,
-                                               restaurant_type=instance.restaurant_type)
+                                               restaurant_type=instance.restaurant_type,
+                                               country=instance.restaurant_country,
+                                               city=instance.restaurant_city)
         for i in range(instance.two_seats_tables):
             table_2 = Table.objects.create(location=restaurant, capacity=2)
         for i in range(instance.four_seats_tables):
