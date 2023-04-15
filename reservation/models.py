@@ -5,6 +5,8 @@ from accounts.models import CustomUser
 class Restaurant(models.Model):
     owner = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
+    country = models.ForeignKey('cities_light.Country', on_delete=models.SET_NULL, null=True, blank=True)
+    city = models.ForeignKey('cities_light.City', on_delete=models.SET_NULL, null=True, blank=True)
     address = models.CharField(max_length=400)
     restaurant_type = models.CharField(max_length=50, choices=CustomUser.RESTAURANT_TYPES)
     restaurant_tables = models.ManyToManyField("reservation.Table")
