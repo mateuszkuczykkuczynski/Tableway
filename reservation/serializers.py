@@ -13,8 +13,8 @@ class TableSerializer(serializers.ModelSerializer):
         return obj.location.name
 
 
+class TableSerializerEditableFields(serializers.ModelSerializer):
+    class Meta:
+        model = Table
+        fields = ("reserved_time",)
 
-# class RestaurantsSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Restaurant
-#         fields = ("name", "address", "restaurant_type")

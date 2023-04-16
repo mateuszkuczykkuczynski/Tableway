@@ -1,7 +1,10 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView, RetrieveAPIView
+from rest_framework.response import Response
+from rest_framework import status
+
 from django.http import Http404
 
-from .serializers import TableSerializer
+from .serializers import TableSerializer, TableSerializerEditableFields
 from .models import Table, Restaurant
 
 
@@ -15,13 +18,6 @@ class AvailableTablesView(ListAPIView):
         capacity = self.request.query_params.get('capacity', None)
         city = self.request.query_params.get('city', None)
 
-        # try:
-        #     restaurant = Restaurant.objects.get(name=restaurant_name)
-        #     r_type = Restaurant.objects.get(restaurant_type=restaurant_type)
-        #     r_city = Restaurant.objects.get(city=city)
-        # except Restaurant.DoesNotExist:
-        #     raise Http404
-        # return Table.objects.filter(location=restaurant and r_type and r_city, is_reserved=False, capacity=capacity)
         if restaurant_name:
             queryset = queryset.filter(location__name__icontains=restaurant_name)
         if restaurant_type:
@@ -32,6 +28,32 @@ class AvailableTablesView(ListAPIView):
             queryset = queryset.filter(capacity=capacity)
 
         return queryset
+
+
+class TableDetailsView(RetrieveAPIView):
+    queryset = Table.objects.all()
+    serializer_class = TableSerializer
+
+
+class TableReservationView(UpdateAPIView):
+    queryset = Table.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return TableSerializerEditableFields
+        return TableSerializer
+
+
+class CancelTableReservation(DestroyAPIView):
+    queryset = Table.objects.all()
+    serializer_class = TableSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.reserved_time = None
+        instance.is_reserved = False
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # class AllRestaurantsAvailableTablesView(ListAPIView):
 #     serializer_class = TableSerializer
