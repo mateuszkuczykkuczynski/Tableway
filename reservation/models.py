@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import CustomUser
+from datetime import timedelta
 
 
 class Restaurant(models.Model):
@@ -20,3 +21,11 @@ class Table(models.Model):
     capacity = models.IntegerField()
     is_reserved = models.BooleanField(default=False)
     reserved_time = models.DateTimeField(null=True, blank=True)
+    duration = models.PositiveIntegerField(null=True, blank=True)  # minutes
+    reserved_time_end = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.duration and self.reserved_time:
+            self.reserved_time_end = self.reserved_time + timedelta(minutes=self.duration)
+        super().save(*args, **kwargs)
+
