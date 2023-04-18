@@ -23,9 +23,11 @@ class Table(models.Model):
     reserved_time = models.DateTimeField(null=True, blank=True)
     duration = models.PositiveIntegerField(null=True, blank=True)  # minutes
     reserved_time_end = models.DateTimeField(null=True, blank=True)
+    reserved_time_range = models.CharField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.duration and self.reserved_time:
             self.reserved_time_end = self.reserved_time + timedelta(minutes=self.duration)
+            self.reserved_time_range = (self.reserved_time, self.reserved_time_end)
         super().save(*args, **kwargs)
 
