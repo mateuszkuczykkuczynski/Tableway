@@ -26,7 +26,8 @@ from .models import CustomUser
 #     add_fieldsets = UserAdmin.add_fieldsets + ((None, {"fields": ("name", "surname", "is_restaurant",
 #                                                                   "restaurant_name", "restaurant_address",
 #                                                                   "restaurant_type", "two_seats_tables",
-#                                                                   "four_seats_tables", "more_than_four_seats_tables")}),
+#                                                                   "four_seats_tables",
+#                                                                   "more_than_four_seats_tables")}),
 #                                                )
 
 
