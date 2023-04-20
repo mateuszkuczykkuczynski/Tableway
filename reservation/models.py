@@ -16,18 +16,46 @@ class Restaurant(models.Model):
         return self.name
 
 
-class Table(models.Model):
-    location = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='tables')
-    capacity = models.IntegerField()
-    is_reserved = models.BooleanField(default=False)
+class Reservation(models.Model):
     reserved_time = models.DateTimeField(null=True, blank=True)
-    duration = models.PositiveIntegerField(null=True, blank=True)  # minutes
+    duration = models.IntegerField(null=True, blank=True)  # minutes
     reserved_time_end = models.DateTimeField(null=True, blank=True)
-    reserved_time_range = models.CharField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.duration and self.reserved_time:
             self.reserved_time_end = self.reserved_time + timedelta(minutes=self.duration)
-            self.reserved_time_range = (self.reserved_time, self.reserved_time_end)
         super().save(*args, **kwargs)
+
+
+class Table(models.Model):
+    location = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='tables')
+    capacity = models.IntegerField()
+    is_reserved = models.BooleanField(default=False)
+    reservation = models.ForeignKey(Reservation, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def is_reserved_on_date(self, date):
+        if self.reservation and self.reservation.reserved_time.date() <= date <= self.reservation.reserved_time_end.date():
+            self.is_reserved = True
+        else:
+            self.is_reserved = False
+        self.save()
+        return self.is_reserved
+
+
+
+# class Table(models.Model):
+#     location = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='tables')
+#     capacity = models.IntegerField()
+#     is_reserved = models.BooleanField(default=False)
+#     reserved_time = models.DateTimeField(null=True, blank=True)
+#     duration = models.DurationField(null=True, blank=True)  # minutes
+#     reserved_time_end = models.DateTimeField(null=True, blank=True)
+#     # reserved_time_range = models.CharField(null=True, blank=True)
+#
+#     def save(self, *args, **kwargs):
+#         if self.duration and self.reserved_time:
+#             self.reserved_time_end = self.reserved_time + timedelta(minutes=self.duration)
+#             self.reserved_time_range = (self.reserved_time, self.reserved_time_end)
+#         super().save(*args, **kwargs)
+
 

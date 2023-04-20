@@ -2,6 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from accounts.models import CustomUser
 from reservation.models import Restaurant, Table
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @receiver(post_save, sender=CustomUser)
@@ -26,8 +27,10 @@ def create_restaurant(sender, instance, created, **kwargs):
 @receiver(post_save, sender=CustomUser)
 def save_restaurant_and_tables(sender, instance, **kwargs):
     # if instance.is_restaurant:
-    instance.restaurant.save()
-    for table in instance.restaurant.restaurant_tables.all():
-        table.save()
-
+    try:
+        instance.restaurant.save()
+        for table in instance.restaurant.restaurant_tables.all():
+            table.save()
+    except ObjectDoesNotExist:
+        Restaurant.objects.create(owner=instance)
 
