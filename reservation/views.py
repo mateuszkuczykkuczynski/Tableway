@@ -4,7 +4,7 @@ from rest_framework import status
 
 from django.http import Http404
 
-from .serializers import TableSerializer, TableSerializerEditableFields
+from .serializers import TableSerializer, ReservationSerializerEditableFields
 from .models import Table, Restaurant
 
 
@@ -40,7 +40,7 @@ class TableReservationView(UpdateAPIView):
 
     def get_serializer_class(self):
         if self.request.method == 'PUT':
-            return TableSerializerEditableFields
+            return ReservationSerializerEditableFields
         return TableSerializer
 
 
