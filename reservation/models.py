@@ -20,6 +20,18 @@ class Reservation(models.Model):
     reserved_time = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(null=True, blank=True)  # minutes
     reserved_time_end = models.DateTimeField(null=True, blank=True)
+    table = models.ForeignKey("reservation.Table", on_delete=models.CASCADE, related_name='reservations',
+                              null=True, blank=True)
+
+    def has_conflicting_reservation(self):
+        if self.table and self.reserved_time and self.reserved_time_end:
+            conflicting_reservations = Reservation.objects.filter(
+                table=self.table,
+                reserved_time__lt=self.reserved_time_end,
+                reserved_time_end__gt=self.reserved_time,
+            ).exclude(pk=self.pk)
+            return conflicting_reservations.exists()
+        return False
 
     def save(self, *args, **kwargs):
         if self.duration and self.reserved_time:
@@ -37,7 +49,8 @@ class Table(models.Model):
         if self.reservation and self.reservation.reserved_time.date() <= date <= self.reservation.reserved_time_end.date():
             self.is_reserved = True
         else:
-            self.is_reserved = False
+            has_conflicting_reservation = self.reservation.has_conflicting_reservation() if self.reservation else False
+            self.is_reserved = has_conflicting_reservation
         self.save()
         return self.is_reserved
 

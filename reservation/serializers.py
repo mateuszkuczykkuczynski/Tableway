@@ -8,7 +8,7 @@ class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = ("restaurant_name", "location", "capacity",
-                  "is_reserved",)
+                  "is_reserved", "reservation", )
 
     def get_restaurant_name(self, obj):
         return obj.location.name
@@ -17,5 +17,11 @@ class TableSerializer(serializers.ModelSerializer):
 class ReservationSerializerEditableFields(serializers.ModelSerializer):
     class Meta:
         model = Reservation
-        fields = ("reserved_time", "duration", "reserved_time_range",)
+        fields = ("reserved_time", "duration",)
 
+
+class ReservationDetailsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Reservation
+        fields = ("reserved_time", "reserved_time_end",)
