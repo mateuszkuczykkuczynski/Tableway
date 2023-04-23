@@ -1,9 +1,6 @@
-from rest_framework.generics import ListAPIView, UpdateAPIView, DestroyAPIView, RetrieveAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.shortcuts import get_object_or_404
-
-from django.http import Http404
 
 from .serializers import TableSerializer, ReservationSerializerEditableFields, ReservationDetailsSerializer
 from .models import Table, Reservation
@@ -45,13 +42,12 @@ class TableReservationView(CreateAPIView):
         return TableSerializer
 
     def post(self, request, *args, **kwargs):
-        table = get_object_or_404(Table, pk=request.data.get('table'))
-        reserved = table.is_reserved_on_date(request.data.get('reserved_time'))
-        if reserved:
-            return Response({'error': 'Table is already reserved for the selected time'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        table = self.get_object()
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
+        table.is_reserved_on_date(serializer.reserved_time, serializer.reserved_time_end)
+        # if serializer.is_valid() and table.is_reserved is False:
+        if serializer.is_valid() and table.is_reserved_on_date(table.reservation.reserved_time,
+                                                               table.reservation.reserved_time_end) is False:
             reservation = serializer.save()
             table.reservation = reservation
             table.is_reserved = True
