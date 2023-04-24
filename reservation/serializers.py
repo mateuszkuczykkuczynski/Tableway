@@ -17,7 +17,7 @@ class TableSerializer(serializers.ModelSerializer):
 class ReservationSerializerEditableFields(serializers.ModelSerializer):
     class Meta:
         model = Reservation
-        fields = ("reserved_time", "duration",)
+        fields = ("reserved_time", "duration")
 
 
 class ReservationDetailsSerializer(serializers.ModelSerializer):

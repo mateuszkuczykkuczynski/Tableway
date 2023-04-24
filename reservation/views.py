@@ -1,6 +1,7 @@
 from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
+from datetime import timedelta
 
 from .serializers import TableSerializer, ReservationSerializerEditableFields, ReservationDetailsSerializer
 from .models import Table, Reservation
@@ -44,10 +45,10 @@ class TableReservationView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         table = self.get_object()
         serializer = self.get_serializer(data=request.data)
-        table.is_reserved_on_date(serializer.reserved_time, serializer.reserved_time_end)
-        # if serializer.is_valid() and table.is_reserved is False:
-        if serializer.is_valid() and table.is_reserved_on_date(table.reservation.reserved_time,
-                                                               table.reservation.reserved_time_end) is False:
+        serializer.is_valid(raise_exception=True)
+        time_end = serializer.validated_data['reserved_time'] + timedelta(minutes=serializer.validated_data['duration'],)
+        table.is_reserved_on_date(serializer.validated_data['reserved_time'], time_end)
+        if table.is_reserved_on_date(serializer.validated_data['reserved_time'], time_end) is False:
             reservation = serializer.save()
             table.reservation = reservation
             table.is_reserved = True
