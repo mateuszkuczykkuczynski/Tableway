@@ -37,12 +37,13 @@ class Table(models.Model):
                                     related_name='tables_reserved')
 
     def is_reserved_on_date(self, date_start, date_end):
-        if self.reservation and self.reservation.reserved_time.date() <= date_start and date_end \
-                <= self.reservation.reserved_time_end.date():
-            # self.is_reserved = True
+        # if self.reservation and self.reservation.reserved_time <= date_start and date_end <= self.reservation.reserved_time_end:
+        if self.reservation and self.reservation.reserved_time <= date_start and date_end <= self.reservation.reserved_time_end:
             return True
         else:
             return False
+
+        # self.is_reserved = True
             # self.is_reserved = False
         # self.save()
         # return self.is_reserved
