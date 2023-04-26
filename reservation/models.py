@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import CustomUser
 from datetime import timedelta
+import datetime
 
 
 class Restaurant(models.Model):
@@ -19,7 +20,7 @@ class Restaurant(models.Model):
 class Reservation(models.Model):
     reserved_time = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(null=True, blank=True)  # minutes
-    reserved_time_end = models.DateTimeField(null=True, blank=True)
+    reserved_time_end = models.DateTimeField(null=True, blank=True, default=datetime.datetime.now)
     table_number = models.ForeignKey("reservation.Table", on_delete=models.CASCADE, related_name='reservations',
                                      null=True, blank=True)
 
@@ -33,17 +34,29 @@ class Table(models.Model):
     location = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='tables')
     capacity = models.IntegerField()
     is_reserved = models.BooleanField(default=False)
-    reservation = models.ForeignKey(Reservation, on_delete=models.SET_NULL, null=True, blank=True,
-                                    related_name='tables_reserved')
+    reservation = models.ManyToManyField(Reservation, blank=True, related_name='tables_reserved')
 
     def is_reserved_on_date(self, date_start, date_end):
-        # if self.reservation and self.reservation.reserved_time <= date_start and date_end <= self.reservation.reserved_time_end:
-        if self.reservation and self.reservation.reserved_time <= date_start and date_end <= self.reservation.reserved_time_end:
-            return True
+        if self.reservations.filter(reserved_time__lt=date_end, reserved_time_end__gt=date_start).exists():
+            self.is_reserved = True
         else:
-            return False
+            self.is_reserved = False
 
-        # self.is_reserved = True
-            # self.is_reserved = False
-        # self.save()
-        # return self.is_reserved
+# class Table(models.Model):
+#     location = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='tables')
+#     capacity = models.IntegerField()
+#     is_reserved = models.BooleanField(default=False)
+#     reservation = models.ManyToManyField(Reservation, on_delete=models.SET_NULL, null=True, blank=True,
+#                                          related_name='tables_reserved')
+#
+#     def is_reserved_on_date(self, date_start, date_end):
+#         if self.reservation:
+#             if self.reservation.reserved_time < date_end and self.reservation.reserved_time_end > date_start:
+#                 self.is_reserved = True
+#             else:
+#                 self.is_reserved = False
+#         else:
+#             self.is_reserved = False
+
+
+
