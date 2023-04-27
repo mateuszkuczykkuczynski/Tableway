@@ -42,6 +42,22 @@ class TableReservationView(CreateAPIView):
             return ReservationSerializerEditableFields
         return TableSerializer
 
+    def post(self, request, *args, **kwargs):
+        table = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        time_end = serializer.validated_data['reserved_time'] + timedelta(
+            minutes=serializer.validated_data['duration'],
+        )
+        table.is_reserved_on_date(serializer.validated_data['reserved_time'], time_end)
+        if table.is_reserved is False:
+            reservation = serializer.save()
+            table.reservations.add(reservation)
+            table.is_reserved = True
+            table.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     # def post(self, request, *args, **kwargs):
     #     table = self.get_object()
     #     serializer = self.get_serializer(data=request.data)
@@ -58,22 +74,6 @@ class TableReservationView(CreateAPIView):
     #         table.save()
     #         return Response(serializer.data, status=status.HTTP_201_CREATED)
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def post(self, request, *args, **kwargs):
-        table = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        time_end = serializer.validated_data['reserved_time'] + timedelta(
-            minutes=serializer.validated_data['duration'],
-        )
-        table.is_reserved_on_date(serializer.validated_data['reserved_time'], time_end)
-        if table.is_reserved is False:
-            reservation = serializer.save()
-            table.reservations.add(reservation)
-            table.is_reserved = True
-            table.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CancelTableReservation(DestroyAPIView):
