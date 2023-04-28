@@ -42,6 +42,7 @@ class Table(models.Model):
         else:
             self.is_reserved = False
 
+
 # class Table(models.Model):
 #     location = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='tables')
 #     capacity = models.IntegerField()
