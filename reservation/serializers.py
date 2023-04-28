@@ -2,20 +2,6 @@ from rest_framework import serializers
 from .models import Table, Reservation
 
 
-# class TableSerializer(serializers.ModelSerializer):
-#     # reservations = serializers.PrimaryKeyRelatedField(queryset=Reservation.objects.all(), many=True)
-#     reservations = ReservationSerializer(many=True)
-#     restaurant_name = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = Table
-#         fields = ("restaurant_name", "location", "capacity",
-#                   "is_reserved", "reservations", )
-#
-#     def get_restaurant_name(self, obj):
-#         return obj.location.name
-
-
 class TableSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.SerializerMethodField()
     reservations = serializers.SerializerMethodField()
@@ -53,14 +39,3 @@ class ReservationDetailsSerializer(serializers.ModelSerializer):
         fields = ("reserved_time", "reserved_time_end", "table_number")
 
 
-
-# class TableSerializer(serializers.ModelSerializer):
-#     restaurant_name = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = Table
-#         fields = ("restaurant_name", "location", "capacity",
-#                   "is_reserved", "reservation", )
-#
-#     def get_restaurant_name(self, obj):
-#         return obj.location.name
