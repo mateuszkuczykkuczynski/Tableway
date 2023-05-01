@@ -137,3 +137,10 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 .history
+
+.DS_Store
+
+#Ignore all migrations, uncomment if migrations have to be commited
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
