@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
     'rest_auth.registration',
     'cities_light',
     'drf_spectacular',
@@ -112,11 +113,11 @@ WSGI_APPLICATION = 'django_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env.str("NAME"),
-        'USER': env.str("USER"),
-        'PASSWORD': env.str("PASSWORD"),
-        'HOST': env.str("HOST"),
-        'PORT': env.str("PORT"),
+        'NAME': env("NAME"),
+        'USER': env("USER1"),
+        'PASSWORD': env("PASSWORD"),
+        'HOST': env("HOST"),
+        'PORT': env("PORT"),
     }
 }
 
