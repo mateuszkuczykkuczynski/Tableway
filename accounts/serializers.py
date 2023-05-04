@@ -1,12 +1,15 @@
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from django.contrib.auth import get_user_model
-from rest_framework import serializers, relations
+from rest_framework import serializers
 from cities_light.models import Country, City
+
+from reservation.models import Restaurant, Table
 
 User = get_user_model()
 
 
 class CustomRegistration(RegisterSerializer):
+
     name = serializers.CharField(required=False)
     surname = serializers.CharField(required=False)
     is_restaurant = serializers.BooleanField(required=False, default=False)
@@ -14,19 +17,14 @@ class CustomRegistration(RegisterSerializer):
     restaurant_address = serializers.CharField(required=False, allow_blank=True, max_length=400)
     restaurant_type = serializers.ChoiceField(required=False, allow_blank=True,
                                               choices=User.RESTAURANT_TYPES)
-    restaurant_city = serializers.PrimaryKeyRelatedField( queryset=City.objects.all())
+    restaurant_city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
     restaurant_country = serializers.PrimaryKeyRelatedField(queryset=Country.objects.all())
     two_seats_tables = serializers.IntegerField(required=False, default=0)
     four_seats_tables = serializers.IntegerField(required=False, default=0)
     more_than_four_seats_tables = serializers.IntegerField(required=False, default=0)
 
-    # def get_restaurant_country(self, obj):
-    #     countries = Country.objects.all()
-    #     return countries
-    #
-    # def get_restaurant_city(self, obj):
-    #     cities = City.objects.all()
-    #     return cities
+
+    
 
       def custom_signup(self, request, user):
         if request.POST.get("is_restaurant"):
@@ -68,3 +66,7 @@ class CustomRegistration(RegisterSerializer):
                  in required_fields if data.get(field_name)}
             )
         return data
+
+                                                   
+
+    
