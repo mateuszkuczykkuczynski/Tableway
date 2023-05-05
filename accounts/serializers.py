@@ -42,6 +42,32 @@ class CustomRegistration(RegisterSerializer):
             user.four_seats_tables = four_seats_tables
             user.more_than_four_seats_tables = more_than_four_seats_tables
             user.is_restaurant = True
+
+            restaurant = Restaurant.objects.create(owner=user,
+                                                   name=restaurant_name,
+                                                   address=restaurant_address,
+                                                   restaurant_type=restaurant_type,
+                                                   country=user.restaurant_country,
+                                                   city=user.restaurant_city)
+
+            if user.two_seats_tables.isdigit():
+                for i in range(int(user.two_seats_tables)):
+                    Table.objects.create(location=restaurant, capacity=2)
+            else:
+                user.two_seats_tables = 0
+
+            if user.four_seats_tables.isdigit():
+                for i in range(int(user.four_seats_tables)):
+                    Table.objects.create(location=restaurant, capacity=4)
+            else:
+                user.four_seats_tables = 0
+
+            if user.more_than_four_seats_tables.isdigit():
+                for i in range(int(user.more_than_four_seats_tables)):
+                    Table.objects.create(location=restaurant, capacity=6)
+            else:
+                user.more_than_four_seats_tables = 0
+
         name = request.POST.get("name")
         surname = request.POST.get("surname")
         user.name = name
@@ -50,8 +76,7 @@ class CustomRegistration(RegisterSerializer):
 
     def validate(self, data):
         is_restaurant = data.get("is_restaurant", False)
-        required_fields = ["restaurant_name", "restaurant_address", "restaurant_type",
-                           "two_seats_tables", "four_seats_tables", "more_than_four_seats_tables"]
+        required_fields = ["restaurant_name", "restaurant_address", "restaurant_type"]
         if is_restaurant and not all(data.get(field_name) for field_name in required_fields):
             raise serializers.ValidationError(
                 {field_name: f"{field_name}is required for restaurant accounts" for field_name in required_fields if
@@ -59,72 +84,36 @@ class CustomRegistration(RegisterSerializer):
             )
         elif not is_restaurant and any(data.get(field_name) for field_name in required_fields):
             raise serializers.ValidationError(
-                {field_name: "Fields related to restaurant can only be provided if is_restaurant is True" for field_name
-                 in required_fields if data.get(field_name)}
+                {field_name: "Fields related to restaurant. Can only be provided if you are running a restaurant" for
+                 field_name in required_fields if data.get(field_name)}
             )
         return data
 
-    def create(self, validated_data):
-        is_restaurant = validated_data.pop('is_restaurant')
-        restaurant_name = validated_data.pop('restaurant_name', None)
-        restaurant_address = validated_data.pop('restaurant_address', None)
-        restaurant_type = validated_data.pop('restaurant_type', None)
-        restaurant_country = validated_data.pop('restaurant_country', None)
-        restaurant_city = validated_data.pop('restaurant_city', None)
-        two_seats_tables = validated_data.pop('two_seats_tables', None)
-        four_seats_tables = validated_data.pop('four_seats_tables', None)
-        more_than_four_seats_tables = validated_data.pop('more_than_four_seats_tables', None)
-
-        instance = super().create(validated_data)
-
-        if is_restaurant:
-            print("Creating restaurant and tables...")
-            restaurant = Restaurant.objects.create(owner=instance,
-                                                   name=restaurant_name,
-                                                   address=restaurant_address,
-                                                   restaurant_type=restaurant_type,
-                                                   country=restaurant_country,
-                                                   city=restaurant_city)
-            for i in range(two_seats_tables):
-                Table.objects.create(location=restaurant, capacity=2)
-            for i in range(four_seats_tables):
-                Table.objects.create(location=restaurant, capacity=4)
-            for i in range(more_than_four_seats_tables):
-                Table.objects.create(location=restaurant, capacity=6)
-            print("Created restaurant and tables.")
-
-        return instance
-
-    # def custom_signup(self, request, user):
-    #     if request.POST.get("is_restaurant"):
-    #         user.is_restaurant = True
-    #     user.is_restaurant = False
-    #     name = request.POST.get("name")
-    #     surname = request.POST.get("surname")
-    #     restaurant_name = request.POST.get("restaurant_name")
-    #     restaurant_address = request.POST.get("restaurant_address")
-    #     restaurant_type = request.POST.get("restaurant_type")
-    #     restaurant_country = request.POST.get("restaurant_country")
-    #     restaurant_city = request.POST.get("restaurant_city")
-    #     two_seats_tables = request.POST.get("two_seats_tables")
-    #     four_seats_tables = request.POST.get("four_seats_tables")
-    #     more_than_four_seats_tables = request.POST.get("more_than_four_seats_tables")
-    #     user.restaurant_name = restaurant_name
-    #     user.restaurant_address = restaurant_address
-    #     user.restaurant_type = restaurant_type
-    #     user.restaurant_country = Country.objects.get(pk=restaurant_country)
-    #     user.restaurant_city = City.objects.get(pk=restaurant_city)
-    #     user.two_seats_tables = two_seats_tables
-    #     user.four_seats_tables = four_seats_tables
-    #     user.more_than_four_seats_tables = more_than_four_seats_tables
-    #     user.name = name
-    #     user.surname = surname
-    #     user.save()
-
-    # def get_restaurant_country(self, obj):
-    #     countries = Country.objects.all()
-    #     return countries
+    # def create(self, validated_data):
+    #     is_restaurant = validated_data.pop('is_restaurant')
+    #     restaurant_name = validated_data.pop('restaurant_name')
+    #     restaurant_address = validated_data.pop('restaurant_address')
+    #     restaurant_type = validated_data.pop('restaurant_type')
+    #     restaurant_country = validated_data.pop('restaurant_country')
+    #     restaurant_city = validated_data.pop('restaurant_city')
+    #     two_seats_tables = validated_data.pop('two_seats_tables')
+    #     four_seats_tables = validated_data.pop('four_seats_tables')
+    #     more_than_four_seats_tables = validated_data.pop('more_than_four_seats_tables')
     #
-    # def get_restaurant_city(self, obj):
-    #     cities = City.objects.all()
-    #     return cities
+    #     if is_restaurant:
+    #         print("Creating restaurant and tables...")
+    #         restaurant = Restaurant.objects.create(owner=instance,
+    #                                                name=restaurant_name,
+    #                                                address=restaurant_address,
+    #                                                restaurant_type=restaurant_type,
+    #                                                country=restaurant_country,
+    #                                                city=restaurant_city)
+    #         for i in range(two_seats_tables):
+    #             Table.objects.create(location=restaurant, capacity=2)
+    #         for i in range(four_seats_tables):
+    #             Table.objects.create(location=restaurant, capacity=4)
+    #         for i in range(more_than_four_seats_tables):
+    #             Table.objects.create(location=restaurant, capacity=6)
+    #         print("Created restaurant and tables.")
+    #
+    #     return instance
