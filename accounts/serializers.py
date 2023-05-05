@@ -45,6 +45,32 @@ class CustomRegistration(RegisterSerializer):
             user.four_seats_tables = four_seats_tables
             user.more_than_four_seats_tables = more_than_four_seats_tables
             user.is_restaurant = True
+
+            restaurant = Restaurant.objects.create(owner=user,
+                                                   name=restaurant_name,
+                                                   address=restaurant_address,
+                                                   restaurant_type=restaurant_type,
+                                                   country=user.restaurant_country,
+                                                   city=user.restaurant_city)
+
+            if user.two_seats_tables.isdigit():
+                for i in range(int(user.two_seats_tables)):
+                    Table.objects.create(location=restaurant, capacity=2)
+            else:
+                user.two_seats_tables = 0
+
+            if user.four_seats_tables.isdigit():
+                for i in range(int(user.four_seats_tables)):
+                    Table.objects.create(location=restaurant, capacity=4)
+            else:
+                user.four_seats_tables = 0
+
+            if user.more_than_four_seats_tables.isdigit():
+                for i in range(int(user.more_than_four_seats_tables)):
+                    Table.objects.create(location=restaurant, capacity=6)
+            else:
+                user.more_than_four_seats_tables = 0
+
         name = request.POST.get("name")
         surname = request.POST.get("surname")
         user.name = name
@@ -53,8 +79,7 @@ class CustomRegistration(RegisterSerializer):
 
     def validate(self, data):
         is_restaurant = data.get("is_restaurant", False)
-        required_fields = ["restaurant_name", "restaurant_address", "restaurant_type",
-                           "two_seats_tables", "four_seats_tables", "more_than_four_seats_tables"]
+        required_fields = ["restaurant_name", "restaurant_address", "restaurant_type"]
         if is_restaurant and not all(data.get(field_name) for field_name in required_fields):
             raise serializers.ValidationError(
                 {field_name: f"{field_name}is required for restaurant accounts" for field_name in required_fields if
@@ -62,11 +87,9 @@ class CustomRegistration(RegisterSerializer):
             )
         elif not is_restaurant and any(data.get(field_name) for field_name in required_fields):
             raise serializers.ValidationError(
-                {field_name: "Fields related to restaurant can only be provided if is_restaurant is True" for field_name
-                 in required_fields if data.get(field_name)}
+                {field_name: "Fields related to restaurant. Can only be provided if you are running a restaurant" for
+                 field_name in required_fields if data.get(field_name)}
             )
         return data
 
-                                                   
 
-    
