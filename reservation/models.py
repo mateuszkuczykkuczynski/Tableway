@@ -12,9 +12,21 @@ class Restaurant(models.Model):
     address = models.CharField(max_length=400)
     restaurant_type = models.CharField(max_length=50, choices=CustomUser.RESTAURANT_TYPES)
     restaurant_tables = models.ManyToManyField("reservation.Table")
+    restaurant_employees = models.ForeignKey("reservation.Employee", on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.name
+
+
+class Employee(models.Model):
+    name = models.CharField(max_length=200)
+    surname = models.CharField(max_length=200)
+    reservation_served = models.ForeignKey("reservation.Reservation", on_delete=models.SET_NULL, null=True, blank=True)
+    account_number = models.CharField(max_length=28)
+
+    # tips_daily =
+    # tips_monthly =
+    # tips_overall =
 
 
 class Reservation(models.Model):
@@ -42,14 +54,6 @@ class Table(models.Model):
         else:
             self.is_reserved = False
 
-
-# class Table(models.Model):
-#     location = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='tables')
-#     capacity = models.IntegerField()
-#     is_reserved = models.BooleanField(default=False)
-#     reservation = models.ManyToManyField(Reservation, on_delete=models.SET_NULL, null=True, blank=True,
-#                                          related_name='tables_reserved')
-#
 #     def is_reserved_on_date(self, date_start, date_end):
 #         if self.reservation:
 #             if self.reservation.reserved_time < date_end and self.reservation.reserved_time_end > date_start:
