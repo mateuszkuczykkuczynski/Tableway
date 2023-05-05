@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     # local
     'accounts',
     'reservation',
-
 ]
 
 SITE_ID = 1
