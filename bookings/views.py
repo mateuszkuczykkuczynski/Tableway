@@ -67,9 +67,9 @@ class TableReservationView(CreateAPIView):
     #     )
     #     table.is_reserved_on_date(serializer.validated_data['reserved_time'], time_end)
     #     if table.is_reserved is False:
-    #         reservation = serializer.save()
-    #         # table.reservation = reservation
-    #         table.reservation.set([reservation])
+    #         reservations = serializer.save()
+    #         # table.reservations = reservations
+    #         table.reservations.set([reservations])
     #         table.is_reserved = True
     #         table.save()
     #         return Response(serializer.data, status=status.HTTP_201_CREATED)
