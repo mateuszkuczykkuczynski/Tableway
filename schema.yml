@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Tableway API Project
   version: 1.0.0
-  description: Restaurant reservation and payment management system build in DRF
+  description: Restaurant bookings and payment management system build in DRF
 paths:
   /api/schema/:
     get:
@@ -786,7 +786,7 @@ components:
           readOnly: true
       required:
       - capacity
-      - reservations
+      - bookings
       - restaurant_name
     UserDetails:
       type: object
