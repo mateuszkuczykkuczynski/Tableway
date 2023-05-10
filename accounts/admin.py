@@ -32,4 +32,19 @@ from .models import CustomUser
 
 
 # admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(CustomUser)
+
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "email",
+        "username",
+        "is_staff",
+        "name",
+        "surname",
+        "is_restaurant",
+        "restaurant_name",
+        "restaurant_address",
+    ]
+
+
+admin.site.register(CustomUser, CustomUserAdmin)
