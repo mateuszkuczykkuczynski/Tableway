@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from cities_light.models import Country, City
 
-from reservation.models import Restaurant, Table
+from bookings.models import Restaurant, Table
 
 User = get_user_model()
 
@@ -93,3 +93,57 @@ class CustomRegistration(RegisterSerializer):
         return data
 
 
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ("name", "surname",)
+
+
+
+# class ListRetrieveUserSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = User
+#         fields = ("name", "surname",)
+#
+#
+# class DestroyUpdateUserSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = User
+#         fields = ("name", "surname",)
+
+
+# class LogoutSerializer(serializers.Serializer):
+#     pass
+
+    # def create(self, validated_data):
+    #     is_restaurant = validated_data.pop('is_restaurant')
+    #     restaurant_name = validated_data.pop('restaurant_name')
+    #     restaurant_address = validated_data.pop('restaurant_address')
+    #     restaurant_type = validated_data.pop('restaurant_type')
+    #     restaurant_country = validated_data.pop('restaurant_country')
+    #     restaurant_city = validated_data.pop('restaurant_city')
+    #     two_seats_tables = validated_data.pop('two_seats_tables')
+    #     four_seats_tables = validated_data.pop('four_seats_tables')
+    #     more_than_four_seats_tables = validated_data.pop('more_than_four_seats_tables')
+    #
+    #     if is_restaurant:
+    #         print("Creating restaurant and tables...")
+    #         restaurant = Restaurant.objects.create(owner=instance,
+    #                                                name=restaurant_name,
+    #                                                address=restaurant_address,
+    #                                                restaurant_type=restaurant_type,
+    #                                                country=restaurant_country,
+    #                                                city=restaurant_city)
+    #         for i in range(two_seats_tables):
+    #             Table.objects.create(location=restaurant, capacity=2)
+    #         for i in range(four_seats_tables):
+    #             Table.objects.create(location=restaurant, capacity=4)
+    #         for i in range(more_than_four_seats_tables):
+    #             Table.objects.create(location=restaurant, capacity=6)
+    #         print("Created restaurant and tables.")
+    #
+    #     return instance
