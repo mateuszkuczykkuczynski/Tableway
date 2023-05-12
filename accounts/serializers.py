@@ -23,7 +23,10 @@ class CustomRegistration(RegisterSerializer):
     four_seats_tables = serializers.IntegerField(required=False, default=0)
     more_than_four_seats_tables = serializers.IntegerField(required=False, default=0)
 
-    def custom_signup(self, request, user):
+
+    
+
+      def custom_signup(self, request, user):
         if request.POST.get("is_restaurant"):
             restaurant_name = request.POST.get("restaurant_name")
             restaurant_address = request.POST.get("restaurant_address")
@@ -90,6 +93,7 @@ class CustomRegistration(RegisterSerializer):
         return data
 
 
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -143,4 +147,3 @@ class UserSerializer(serializers.ModelSerializer):
     #         print("Created restaurant and tables.")
     #
     #     return instance
-
