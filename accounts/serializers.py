@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from cities_light.models import Country, City
 
-from reservation.models import Restaurant, Table
+from bookings.models import Restaurant, Table
 
 User = get_user_model()
 
@@ -89,6 +89,32 @@ class CustomRegistration(RegisterSerializer):
             )
         return data
 
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ("name", "surname",)
+
+
+
+# class ListRetrieveUserSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = User
+#         fields = ("name", "surname",)
+#
+#
+# class DestroyUpdateUserSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = User
+#         fields = ("name", "surname",)
+
+
+# class LogoutSerializer(serializers.Serializer):
+#     pass
+
     # def create(self, validated_data):
     #     is_restaurant = validated_data.pop('is_restaurant')
     #     restaurant_name = validated_data.pop('restaurant_name')
@@ -117,3 +143,4 @@ class CustomRegistration(RegisterSerializer):
     #         print("Created restaurant and tables.")
     #
     #     return instance
+

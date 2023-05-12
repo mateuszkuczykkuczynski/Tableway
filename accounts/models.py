@@ -26,5 +26,3 @@ class CustomUser(AbstractUser):
     two_seats_tables = models.IntegerField(default=0, blank=True)
     four_seats_tables = models.IntegerField(default=0, blank=True)
     more_than_four_seats_tables = models.IntegerField(default=0, blank=True)
-    employees =
-
