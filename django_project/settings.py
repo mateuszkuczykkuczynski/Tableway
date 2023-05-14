@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     # local
     'accounts',
     'bookings',
-    'payments'
+    'payments',
 
 ]
 
