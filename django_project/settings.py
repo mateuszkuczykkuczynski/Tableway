@@ -40,23 +40,27 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    # "django.contrib.sites",
+    "django.contrib.sites",
 
     # 3rd-party apps
     "rest_framework",
     'rest_framework.authtoken',
     'rest_auth',
-    'django.contrib.sites',
+    'corsheaders',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'rest_auth.registration',
     'cities_light',
     'drf_spectacular',
+    'django_extensions',
+    'rest_framework_swagger',
+    'drf_schemas',
 
     # local
     'accounts',
-    'reservation',
+    'bookings',
+    'payments'
 
 ]
 
@@ -64,7 +68,11 @@ SITE_ID = 1
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
+        "rest_framework.permissions.IsAuthenticated",
+        ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
@@ -72,6 +80,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,6 +88,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ORIGIN_WHITELIST = (
+    "http://localhost:3000",
+    "http://localhost:8000",
+)
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
@@ -169,7 +185,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Tableway API Project",
-    "DESCRIPTION": "Restaurant reservation and payment management system build in DRF",
+    "DESCRIPTION": "Restaurant bookings and payment management system build in DRF",
     "VERSION": "1.0.0",
 
 }
