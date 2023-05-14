@@ -20,8 +20,10 @@ from drf_spectacular.views import (SpectacularAPIView, SpectacularSwaggerView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/v1/bookings/", include("bookings.urls")),
+    path("api/v1/accounts/", include("accounts.urls")),
+    # path("api/v1/payments/", include("payments.urls")),
     path("api-auth/", include("rest_framework.urls")),
-    path("api/v1/", include("reservation.urls")),
     re_path(r'^rest-auth/', include('rest_auth.urls')),
     re_path(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
