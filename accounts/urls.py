@@ -5,7 +5,7 @@ from rest_framework import routers
 
 router = routers.SimpleRouter()
 
-router.register(r'users', UserViewSet)
+router.register(r'users', UserViewSet,  basename='user')
 # router.register(r'users', ListRetrieveUserViewSet)
 # router.register(r'users-test', DestroyUpdateUserViewSet, basename='user-change')
 
