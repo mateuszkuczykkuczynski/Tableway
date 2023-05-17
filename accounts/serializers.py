@@ -100,24 +100,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ("name", "surname",)
 
-
-
-# class ListRetrieveUserSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = User
-#         fields = ("name", "surname",)
-#
-#
-# class DestroyUpdateUserSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = User
-#         fields = ("name", "surname",)
-
-
-# class LogoutSerializer(serializers.Serializer):
-#     pass
+    # This could be used in refactoring phase.
 
     # def create(self, validated_data):
     #     is_restaurant = validated_data.pop('is_restaurant')
