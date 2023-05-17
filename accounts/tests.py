@@ -58,6 +58,38 @@ class UserTests(APITestCase):
 
         )
 
+        cls.user4 = get_user_model().objects.create_user(
+            username="testuser4",
+            email="testuser4@gmail.com",
+            password="TestSecret4!",
+            name="Zdzisiek",
+            surname="Zdzisiowski",
+            is_restaurant=True,
+            restaurant_name="ZdzisiowskaPrzystan",
+            restaurant_address="Wielkiego Młyna 90Z",
+            restaurant_type="Greek",
+            two_seats_tables=4,
+            four_seats_tables=4,
+            more_than_four_seats_tables=2,
+
+        )
+
+        cls.user5 = get_user_model().objects.create_user(
+            username="testuser5",
+            email="testuser5@gmail.com",
+            password="TestSecret5!",
+            name="Misiek",
+            surname="Misiowski",
+            is_restaurant=True,
+            restaurant_name="MiodowaPrzystan",
+            restaurant_address="Miodowa 22B",
+            restaurant_type="Spanish",
+            two_seats_tables=4,
+            four_seats_tables=4,
+            more_than_four_seats_tables=2,
+
+        )
+
     def test_user_model(self):
         self.assertEqual(self.user1.username, "testuser1")
         self.assertEqual(self.user1.email, "testuser1@gmail.com")
@@ -94,7 +126,8 @@ class UserTests(APITestCase):
 
     def test_api_users_listview_contains_all_users(self):
         self.client.login(username='testuser1', password='TestSecret1!')
-        self.assertEqual(User.objects.count(), 3)
+        response = self.client.get(reverse("user-list"))
+        self.assertEqual(len(response.data), User.objects.count())
 
     def test_api_users_list_view_contains_correct_users_data(self):
         self.client.login(username='testuser2', password='TestSecret2!')
@@ -186,3 +219,25 @@ class UserTests(APITestCase):
         # TO CHECK WHY!!!!!
         self.assertIsNone(User.objects.get(id=3).name)
         self.assertIsNone(User.objects.get(id=3).surname)
+
+    def test_api_users_delete_method_status_code_if_authenticated_and_authorized(self):
+        self.client.login(username='testuser4', password='TestSecret4!')
+        response = self.client.delete(reverse("user-detail", kwargs={"pk": self.user4.id}))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_api_users_delete_method_status_code_if_authenticated_and_not_authorized(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.delete(reverse("user-detail", kwargs={"pk": self.user4.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_api_users_delete_method_status_code_if_not_authenticated(self):
+        response = self.client.delete(reverse("user-detail", kwargs={"pk": self.user4.id}))
+        # self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_api_users_delete_method_correctly_deletes_data_from_fb(self):
+        initial_count = User.objects.count()
+
+        self.client.login(username='testuser5', password='TestSecret5!')
+        self.client.delete(reverse("user-detail", kwargs={"pk": self.user5.id}))
+        self.assertEqual(User.objects.count(), initial_count - 1)
