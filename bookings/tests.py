@@ -263,18 +263,19 @@ class ReservationSystemTests(APITestCase):
                                     data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    # def test_cancel_table_reserv_status_code_if_authenticated_and_autorized(self):
-    #     self.client.login(username='testuser44', password='TestSecret44!')
-    #     data = {
-    #         "reserved_time": "2023-12-22T00:15:00.725Z",
-    #         "duration": 90
-    #     }
-    #     self.client.post(reverse("table_reservation", kwargs={"pk": self.table3.id}),
-    #                      data=data, format="json")
-    #
-    #     table_66666 = Table.objects.first()
-    #     response = self.client.delete(reverse("cancel_table_reservation", kwargs={"pk": 1}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_cancel_table_reserv_status_code_if_authenticated_and_autorized(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
+            "reserved_time": "2023-12-22T00:15:00.725Z",
+            "duration": 90
+        }
+        self.client.post(reverse("table_reservation", kwargs={"pk": self.table3.id}),
+                         data=data, format="json")
+
+        obj = self.table3.reservation.get(duration=90)
+
+        response = self.client.post(reverse("cancel_table_reservation", kwargs={"pk": obj.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 
