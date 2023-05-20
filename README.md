@@ -8,4 +8,5 @@ Actually working on app basics.
 - No tokenization, authentication and authorisation yet (will be done next).
 - Payments app is currently in "initial phase". 
 - Currently working on possibility to create list of reservation connect to one table (now table can only contain one reservation) [DONE]. 
-- Actually fixing Country/ City field (user not able to choose) and writing some tests.
+- Actually fixing Country/ City field (user not able to choose) [DONE] and writing some tests. 
+- 20.05.2023 App is in tests phase.
