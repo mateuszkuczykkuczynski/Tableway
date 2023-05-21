@@ -1,5 +1,5 @@
 from django.contrib import admin
-from reservations.models import Restaurant, Table
+from bookings.models import Restaurant, Table
 
 
 # class TableInline(admin.TabularInline):
@@ -12,7 +12,3 @@ from reservations.models import Restaurant, Table
 
 admin.site.register(Restaurant)
 admin.site.register(Table)
-
-
-
-
