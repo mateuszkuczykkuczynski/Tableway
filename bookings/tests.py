@@ -4,7 +4,7 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 from datetime import datetime
 
-from .models import Table, Restaurant
+from .models import Table, Restaurant, Reservation
 
 User = get_user_model()
 
@@ -274,12 +274,37 @@ class ReservationSystemTests(APITestCase):
 
         obj = self.table3.reservation.get(duration=90)
 
-        response = self.client.post(reverse("cancel_table_reservation", kwargs={"pk": obj.id}))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.delete(reverse("cancel_table_reservation", kwargs={"pk": obj.id}))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+    def test_cancel_table_reserv_status_code_if_authenticated_and_not_autorized(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
+            "reserved_time": "2023-12-28T00:15:00.725Z",
+            "duration": 60
+        }
+        self.client.post(reverse("table_reservation", kwargs={"pk": self.table2.id}),
+                         data=data, format="json")
 
+        obj = self.table2.reservation.get(duration=60)
 
+        self.client.login(username='testuser11', password='TestSecret11!')
+        response = self.client.delete(reverse("cancel_table_reservation", kwargs={"pk": obj.id}))
 
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_cancel_table_reserv_delete_method_correctly_deletes_data_from_fb(self):
+        initial_count = Reservation.objects.count()
 
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
+            "reserved_time": "2023-08-20T00:45:00.725Z",
+            "duration": 120
+        }
+        self.client.post(reverse("table_reservation", kwargs={"pk": self.table2.id}),
+                         data=data, format="json")
 
+        obj = self.table2.reservation.get(duration=120)
+        self.client.delete(reverse("cancel_table_reservation", kwargs={"pk": obj.id}))
+
+        self.assertEqual(Reservation.objects.count(), initial_count - 1)
