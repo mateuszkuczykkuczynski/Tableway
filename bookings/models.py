@@ -1,9 +1,8 @@
 from django.db import models
 from django.db.models import Sum
+from django_currentuser.db.models import CurrentUserField
 from datetime import date, datetime, timedelta
-import datetime
 from decimal import Decimal
-
 
 from accounts.models import CustomUser
 from payments.models import Tip
@@ -16,8 +15,8 @@ class Restaurant(models.Model):
     city = models.ForeignKey('cities_light.City', on_delete=models.SET_NULL, null=True, blank=True)
     address = models.CharField(max_length=400)
     restaurant_type = models.CharField(max_length=50, choices=CustomUser.RESTAURANT_TYPES)
-    restaurant_tables = models.ManyToManyField("reservations.Table")
-    restaurant_employees = models.ForeignKey("reservations.Employee", on_delete=models.SET_NULL, null=True, blank=True)
+    restaurant_tables = models.ManyToManyField("bookings.Table")
+    restaurant_employees = models.ForeignKey("bookings.Employee", on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -26,7 +25,7 @@ class Restaurant(models.Model):
 class Employee(models.Model):
     name = models.CharField(max_length=200)
     surname = models.CharField(max_length=200)
-    reservation_served = models.ForeignKey("reservations.Reservation", on_delete=models.SET_NULL, null=True, blank=True)
+    reservation_served = models.ForeignKey("bookings.Reservation", on_delete=models.SET_NULL, null=True, blank=True)
     account_number = models.CharField(max_length=28)
     tips_daily = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     tips_monthly = models.DecimalField(max_digits=8, decimal_places=2, default=0)
@@ -55,15 +54,16 @@ class Employee(models.Model):
 class Reservation(models.Model):
     reserved_time = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(null=True, blank=True)  # minutes
-    reserved_time_end = models.DateTimeField(null=True, blank=True, default=datetime.datetime.now)
-    table_number = models.ForeignKey("reservations.Table", on_delete=models.CASCADE, related_name='table_reservations',
+    reserved_time_end = models.DateTimeField(null=True, blank=True, default=datetime.now)
+    table_number = models.ForeignKey("bookings.Table", on_delete=models.CASCADE, related_name='table_reservations',
                                      null=True, blank=True)
     paid = models.BooleanField(default=False)
+    owner = CurrentUserField()
 
     def save(self, *args, **kwargs):
         if self.duration and self.reserved_time:
             self.reserved_time_end = self.reserved_time + timedelta(minutes=self.duration)
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class Table(models.Model):
@@ -77,15 +77,3 @@ class Table(models.Model):
             self.is_reserved = True
         else:
             self.is_reserved = False
-
-#     def is_reserved_on_date(self, date_start, date_end):
-#         if self.reservations:
-#             if self.reservations.reserved_time < date_end and self.reservations.reserved_time_end > date_start:
-#                 self.is_reserved = True
-#             else:
-#                 self.is_reserved = False
-#         else:
-#             self.is_reserved = False
-
-
-

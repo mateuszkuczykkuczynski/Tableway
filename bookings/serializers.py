@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Table, Reservation
+from drf_spectacular.utils import extend_schema_field
+from typing import Union
 
 
 class TableSerializer(serializers.ModelSerializer):
@@ -11,13 +13,16 @@ class TableSerializer(serializers.ModelSerializer):
         model = Table
         fields = ("restaurant_name", "table_number", "capacity", "reservations")
 
+    @extend_schema_field(Union[str, None])
     def get_restaurant_name(self, obj):
         return obj.location.name
 
+    @extend_schema_field(Union[str, None])
     def get_reservations(self, obj):
-        reservations = obj.reservations.all()
+        reservations = obj.reservation.all()
         return ReservationSerializer(reservations, many=True).data
 
+    @extend_schema_field(Union[int, None])
     def get_table_number(self, obj):
         if obj.id:
             return obj.id
@@ -42,6 +47,4 @@ class ReservationDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ("reserved_time", "reserved_time_end", "table_number")
-
-
+        fields = ("reserved_time", "reserved_time_end", "table_number", "owner")

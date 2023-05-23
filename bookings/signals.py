@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from accounts.models import CustomUser
-from reservations.models import Restaurant, Table
+from bookings.models import Restaurant, Table
 
 
 @receiver(post_save, sender=CustomUser)
