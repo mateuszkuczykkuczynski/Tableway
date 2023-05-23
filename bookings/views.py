@@ -2,11 +2,10 @@ from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import timedelta
-from django.shortcuts import get_object_or_404
-
 
 from .serializers import TableSerializer, ReservationSerializerEditableFields, ReservationDetailsSerializer
 from .models import Table, Reservation
+from .permissions import IsOwnerOrAdmin
 
 
 class AvailableTablesView(ListAPIView):
@@ -60,42 +59,10 @@ class TableReservationView(CreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # def post(self, request, *args, **kwargs):
-    #     table = self.get_object()
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     time_end = serializer.validated_data['reserved_time'] + timedelta(
-    #         minutes=serializer.validated_data['duration'],
-    #     )
-    #     table.is_reserved_on_date(serializer.validated_data['reserved_time'], time_end)
-    #     if table.is_reserved is False:
-    #         bookings = serializer.save()
-    #         # table.bookings = bookings
-    #         table.bookings.set([bookings])
-    #         table.is_reserved = True
-    #         table.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# Whole endpoint must be refactored.
-# class CancelTableReservation(DestroyAPIView):
-#     queryset = Reservation.objects.all()
-#     serializer_class = ReservationDetailsSerializer
-#
-#     def destroy(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         instance.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class CancelTableReservationView(DestroyAPIView):
     queryset = Reservation.objects.all()
-    # serializer_class = ReservationDetailsSerializer
-
-    # def destroy(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     instance.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    permission_classes = (IsOwnerOrAdmin,)
 
 
 class ReservationDetailsView(RetrieveAPIView):
