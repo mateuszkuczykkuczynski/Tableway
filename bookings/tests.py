@@ -96,6 +96,11 @@ class ReservationSystemTests(APITestCase):
 
     def test_available_tables_listview_status_code_if_authenticated(self):
         self.client.login(username='testuser11', password='TestSecret11!')
+        response = self.client.get("/api/v1/bookings/tables/available/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_available_tables_listview_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser11', password='TestSecret11!')
         response = self.client.get(reverse("available_tables"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -124,6 +129,11 @@ class ReservationSystemTests(APITestCase):
 
     def test_available_tables_detail_view_status_code_if_authenticated(self):
         self.client.login(username='testuser33', password='TestSecret33!')
+        response = self.client.get(f"/api/v1/bookings/tables/available/{self.table1.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_available_tables_detail_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser33', password='TestSecret33!')
         response = self.client.get(reverse("table_details", kwargs={"pk": self.table1.id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -147,6 +157,16 @@ class ReservationSystemTests(APITestCase):
             self.assertContains(response, reservation.table_number)
 
     def test_reserv_table_status_code_if_authenticated(self):
+        self.client.login(username='testuser11', password='TestSecret11!')
+        data = {
+            "reserved_time": "2023-02-22T00:15:00.725Z",
+            "duration": 60
+        }
+        response = self.client.post(f"/api/v1/bookings/tables/available/reserv/{self.table2.id}",
+                                    data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_reserv_table_status_code_if_authenticated_by_name(self):
         self.client.login(username='testuser11', password='TestSecret11!')
         data = {
             "reserved_time": "2023-06-20T00:15:00.725Z",
@@ -266,6 +286,20 @@ class ReservationSystemTests(APITestCase):
     def test_cancel_table_reserv_status_code_if_authenticated_and_autorized(self):
         self.client.login(username='testuser44', password='TestSecret44!')
         data = {
+            "reserved_time": "2023-06-20T00:15:00.725Z",
+            "duration": 90
+        }
+        self.client.post(reverse("table_reservation", kwargs={"pk": self.table3.id}),
+                         data=data, format="json")
+
+        obj = self.table3.reservation.get(duration=90)
+
+        response = self.client.delete(f"/api/v1/bookings/tables/available/cancel_reserv/{obj.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_cancel_table_reserv_status_code_if_authenticated_and_autorized_by_name(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
             "reserved_time": "2023-12-22T00:15:00.725Z",
             "duration": 90
         }
@@ -294,8 +328,6 @@ class ReservationSystemTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cancel_table_reserv_delete_method_correctly_deletes_data_from_fb(self):
-        initial_count = Reservation.objects.count()
-
         self.client.login(username='testuser44', password='TestSecret44!')
         data = {
             "reserved_time": "2023-08-20T00:45:00.725Z",
@@ -304,7 +336,9 @@ class ReservationSystemTests(APITestCase):
         self.client.post(reverse("table_reservation", kwargs={"pk": self.table2.id}),
                          data=data, format="json")
 
+        initial_count = Reservation.objects.all().count()
+
         obj = self.table2.reservation.get(duration=120)
         self.client.delete(reverse("cancel_table_reservation", kwargs={"pk": obj.id}))
 
-        self.assertEqual(Reservation.objects.count(), initial_count - 1)
+        self.assertEqual(Reservation.objects.all().count(), initial_count - 1)
