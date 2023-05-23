@@ -117,6 +117,11 @@ class UserTests(APITestCase):
 
     def test_api_users_listview_status_code_if_authenticated(self):
         self.client.login(username='testuser1', password='TestSecret1!')
+        response = self.client.get("/api/v1/accounts/users/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_api_users_listview_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
         response = self.client.get(reverse("user-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -138,6 +143,11 @@ class UserTests(APITestCase):
         self.assertContains(response, self.user2.surname)
 
     def test_api_users_detail_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(f"/api/v1/accounts/users/{self.user1.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_api_users_detail_view_status_code_if_authenticated_by_name(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         response = self.client.get(reverse("user-detail", kwargs={"pk": self.user1.id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -216,7 +226,7 @@ class UserTests(APITestCase):
         }
         self.client.put(reverse("user-detail", kwargs={"pk": self.user3.id}),
                         data=data, format="json")
-        # TO CHECK WHY!!!!!
+        # To check why!!
         self.assertIsNone(User.objects.get(id=3).name)
         self.assertIsNone(User.objects.get(id=3).surname)
 
