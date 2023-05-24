@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Table, Reservation
+from .models import Table, Reservation, Employee
 from drf_spectacular.utils import extend_schema_field
 from typing import Union
 
@@ -48,3 +48,32 @@ class ReservationDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = ("reserved_time", "reserved_time_end", "table_number", "owner")
+
+
+class EmployeeSerializerEditableFields(serializers.ModelSerializer):
+
+    class Meta:
+        model = Employee
+        fields = ("name", "surname", "account_number", "works_in", )
+
+
+class EmployeeDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ("name", "surname", "account_number", "tips_daily", "tips_monthly", "tips_overall")
+
+
+class EmployeeSerializerForAddingReservation(serializers.ModelSerializer):
+
+    class Meta:
+        model = Employee
+        fields = ("reservation_served",)
+
+
+class AddEmployeeToReservationSerializer(serializers.ModelSerializer):
+    service = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all())
+
+    class Meta:
+        model = Reservation
+        fields = ("service",)
+

@@ -1,10 +1,12 @@
-from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
 from datetime import timedelta
 
-from .serializers import TableSerializer, ReservationSerializerEditableFields, ReservationDetailsSerializer
-from .models import Table, Reservation
+from .serializers import TableSerializer, ReservationSerializerEditableFields, ReservationDetailsSerializer, \
+    EmployeeSerializerEditableFields, EmployeeDetailsSerializer, AddEmployeeToReservationSerializer
+from .models import Table, Reservation, Employee
 from .permissions import IsOwnerOrAdmin
 
 
@@ -81,3 +83,34 @@ class ReservationDetailsView(RetrieveAPIView):
 #         except Table.DoesNotExist:
 #             raise Http404
 #         return table
+
+
+class EmployeeCreateView(CreateAPIView):
+    queryset = Employee.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return EmployeeSerializerEditableFields
+        return EmployeeDetailsSerializer
+
+    def perform_create(self, serializer):
+        if not self.request.user.is_superuser and self.request.user != serializer.validated_data['works_in'].owner:
+            raise PermissionDenied("You don't have permission to add an employee to this restaurant.")
+
+
+class EmployeeDetailsView(RetrieveAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeDetailsSerializer
+    lookup_field = 'pk'
+
+
+class ReservationAddServiceView(UpdateAPIView):
+    queryset = Reservation.objects.all()
+    serializer_class = AddEmployeeToReservationSerializer
+    permission_classes = (IsOwnerOrAdmin,)
+
+    def perform_update(self, serializer):
+        if not self.request.user.is_superuser and self.request.user != serializer.instance.owner:
+            raise PermissionDenied("You don't have permission to add service to this reservation.")
+
+        serializer.save()

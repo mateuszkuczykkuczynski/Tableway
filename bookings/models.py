@@ -26,6 +26,7 @@ class Employee(models.Model):
     name = models.CharField(max_length=200)
     surname = models.CharField(max_length=200)
     reservation_served = models.ForeignKey("bookings.Reservation", on_delete=models.SET_NULL, null=True, blank=True)
+    works_in = models.ForeignKey("bookings.Restaurant", on_delete=models.SET_NULL, null=True, blank=True)
     account_number = models.CharField(max_length=28)
     tips_daily = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     tips_monthly = models.DecimalField(max_digits=8, decimal_places=2, default=0)
@@ -59,6 +60,8 @@ class Reservation(models.Model):
                                      null=True, blank=True)
     paid = models.BooleanField(default=False)
     owner = CurrentUserField()
+    service = models.ForeignKey("bookings.Employee", on_delete=models.CASCADE, related_name='service_reservation',
+                                null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.duration and self.reserved_time:
