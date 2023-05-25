@@ -21,14 +21,15 @@ class AvailableTablesView(ListAPIView):
         city = self.request.query_params.get('city', None)
 
         if restaurant_name:
-            queryset = queryset.filter(location__name__icontains=restaurant_name)
+            queryset = queryset.filter(location__name=restaurant_name)
         if restaurant_type:
             queryset = queryset.filter(location__restaurant_type=restaurant_type)
         if city:
-            queryset = queryset.filter(location__city__name__icontains=city)
+            queryset = queryset.filter(location__city__name=city)
         if capacity:
             queryset = queryset.filter(capacity=capacity)
 
+        print(queryset)
         return queryset
 
 

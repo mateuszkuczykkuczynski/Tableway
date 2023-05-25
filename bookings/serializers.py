@@ -13,17 +13,34 @@ class TableSerializer(serializers.ModelSerializer):
         model = Table
         fields = ("restaurant_name", "table_number", "capacity", "reservations")
 
+    # @extend_schema_field(Union[str, None])
+    # def get_restaurant_name(self, obj):
+    #     return obj.location.name
+    #
+    # @extend_schema_field(Union[str, None])
+    # def get_reservations(self, obj):
+    #     reservations = obj.reservation.all()
+    #     return ReservationSerializer(reservations, many=True).data
+    #
+    # @extend_schema_field(Union[int, None])
+    # def get_table_number(self, obj):
+    #     if obj.id:
+    #         return obj.id
+    #     return None
     @extend_schema_field(Union[str, None])
     def get_restaurant_name(self, obj):
+        print("DEBUG - get_restaurant_name:", obj.location.name)
         return obj.location.name
 
     @extend_schema_field(Union[str, None])
     def get_reservations(self, obj):
         reservations = obj.reservation.all()
+        print("DEBUG - get_reservations:", reservations)
         return ReservationSerializer(reservations, many=True).data
 
     @extend_schema_field(Union[int, None])
     def get_table_number(self, obj):
+        print("DEBUG - get_table_number:", obj.id)
         if obj.id:
             return obj.id
         return None
@@ -76,4 +93,3 @@ class AddEmployeeToReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = ("service",)
-
