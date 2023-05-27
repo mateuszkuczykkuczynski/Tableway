@@ -2,10 +2,15 @@ from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 from datetime import timedelta
 
+
 from .serializers import TableSerializer, ReservationSerializerEditableFields, ReservationDetailsSerializer, \
-    EmployeeSerializerEditableFields, EmployeeDetailsSerializer, AddEmployeeToReservationSerializer
+    EmployeeSerializerEditableFields, EmployeeDetailsSerializer, AddEmployeeToReservationSerializer,\
+    EmployeesListSerializer, UserReservationsListSerializer, RestaurantReservationsListSerializer, \
+    ReservationPaymentStatusSerializer
 from .models import Table, Reservation, Employee
 from .permissions import IsOwnerOrAdmin
 
@@ -29,7 +34,26 @@ class AvailableTablesView(ListAPIView):
         if capacity:
             queryset = queryset.filter(capacity=capacity)
 
-        print(queryset)
+        return queryset
+
+
+class NowAvailableTablesView(ListAPIView):
+    serializer_class = TableSerializer
+
+    def get_queryset(self):
+        queryset = Table.objects.all()
+        capacity = self.request.query_params.get('capacity', None)
+        city = self.request.query_params.get('city', None)
+        current_time = timezone.now()
+
+        if city:
+            queryset = queryset.filter(location__city__name=city)
+        if capacity:
+            queryset = queryset.filter(capacity=capacity)
+
+        queryset = queryset.exclude(tables_reserved__reserved_time__lte=current_time,
+                                    tables_reserved__reserved_time_end__gt=current_time)
+
         return queryset
 
 
@@ -73,17 +97,64 @@ class ReservationDetailsView(RetrieveAPIView):
     serializer_class = ReservationDetailsSerializer
     lookup_field = 'pk'
 
-# class AllRestaurantsAvailableTablesView(ListAPIView):
-#     serializer_class = TableSerializer
-#
-#     def get_queryset(self):
-#         capacity = self.kwargs['capacity']
-#         restaurant_city = self.kwargs['city']
-#         try:
-#             table = Table.objects.filter(capacity=capacity, is_reserved=False)
-#         except Table.DoesNotExist:
-#             raise Http404
-#         return table
+
+# TODO: Test
+class ReservationPaymentStatusView(UpdateAPIView):
+    serializer_class = ReservationPaymentStatusSerializer
+    queryset = Reservation.objects.all()
+
+    def perform_update(self, serializer):
+        if not self.request.user.is_superuser or \
+                self.request.user != serializer.instance.owner or \
+                self.request.user != serializer.instance.service:
+            raise PermissionDenied("You don't have permission to add service to this reservation.")
+
+        serializer.save()
+
+
+# TODO: Test
+class AllUserReservationsView(ListAPIView):
+    serializer_class = UserReservationsListSerializer
+
+    def get_queryset(self):
+        queryset = Reservation.objects.all()
+        reservation_owner = self.request.query_params.get('owner', None)
+
+        if reservation_owner:
+            queryset = queryset.filter(owner=reservation_owner)
+
+        return queryset
+
+
+# TODO: Test.
+class AllRestaurantReservationsView(ListAPIView):
+    serializer_class = RestaurantReservationsListSerializer
+
+    def get_queryset(self):
+        queryset = Reservation.objects.all()
+        restaurant_id = self.kwargs['restaurant_id']
+        date_param = self.request.query_params.get('date')
+
+        if date_param:
+            date = parse_date(date_param)
+            if date:
+                queryset = queryset.filter(table_number__location__id=restaurant_id, reserved_time__date=date)
+        else:
+            queryset = queryset.filter(table_number__location__id=restaurant_id)
+
+        return queryset
+
+
+class ReservationAddServiceView(UpdateAPIView):
+    queryset = Reservation.objects.all()
+    serializer_class = AddEmployeeToReservationSerializer
+    permission_classes = (IsOwnerOrAdmin,)
+
+    def perform_update(self, serializer):
+        if not self.request.user.is_superuser and self.request.user != serializer.instance.owner:
+            raise PermissionDenied("You don't have permission to add service to this reservation.")
+
+        serializer.save()
 
 
 class EmployeeCreateView(CreateAPIView):
@@ -105,13 +176,24 @@ class EmployeeDetailsView(RetrieveAPIView):
     lookup_field = 'pk'
 
 
-class ReservationAddServiceView(UpdateAPIView):
-    queryset = Reservation.objects.all()
-    serializer_class = AddEmployeeToReservationSerializer
-    permission_classes = (IsOwnerOrAdmin,)
+# TODO: test
+class AllRestaurantEmployeesView(ListAPIView):
+    serializer_class = EmployeesListSerializer
 
-    def perform_update(self, serializer):
-        if not self.request.user.is_superuser and self.request.user != serializer.instance.owner:
-            raise PermissionDenied("You don't have permission to add service to this reservation.")
+    def get_queryset(self):
+        queryset = Employee.objects.all()
+        restaurant_name = self.request.query_params.get('restaurant', None)
 
-        serializer.save()
+        if restaurant_name:
+            queryset = queryset.filter(works_in=restaurant_name)
+
+        return queryset
+
+
+class AllEmployeeReservationsView(ListAPIView):
+    serializer_class = ReservationDetailsSerializer
+
+    def get_queryset(self):
+        employee_id = self.kwargs['employee_id']
+        queryset = Reservation.objects.filter(service__id=employee_id)
+        return queryset

@@ -1,7 +1,8 @@
-from rest_framework import serializers
-from .models import Table, Reservation, Employee
-from drf_spectacular.utils import extend_schema_field
 from typing import Union
+from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
+
+from .models import Table, Reservation, Employee
 
 
 class TableSerializer(serializers.ModelSerializer):
@@ -13,34 +14,17 @@ class TableSerializer(serializers.ModelSerializer):
         model = Table
         fields = ("restaurant_name", "table_number", "capacity", "reservations")
 
-    # @extend_schema_field(Union[str, None])
-    # def get_restaurant_name(self, obj):
-    #     return obj.location.name
-    #
-    # @extend_schema_field(Union[str, None])
-    # def get_reservations(self, obj):
-    #     reservations = obj.reservation.all()
-    #     return ReservationSerializer(reservations, many=True).data
-    #
-    # @extend_schema_field(Union[int, None])
-    # def get_table_number(self, obj):
-    #     if obj.id:
-    #         return obj.id
-    #     return None
     @extend_schema_field(Union[str, None])
     def get_restaurant_name(self, obj):
-        print("DEBUG - get_restaurant_name:", obj.location.name)
         return obj.location.name
 
     @extend_schema_field(Union[str, None])
     def get_reservations(self, obj):
         reservations = obj.reservation.all()
-        print("DEBUG - get_reservations:", reservations)
         return ReservationSerializer(reservations, many=True).data
 
     @extend_schema_field(Union[int, None])
     def get_table_number(self, obj):
-        print("DEBUG - get_table_number:", obj.id)
         if obj.id:
             return obj.id
         return None
@@ -67,6 +51,27 @@ class ReservationDetailsSerializer(serializers.ModelSerializer):
         fields = ("reserved_time", "reserved_time_end", "table_number", "owner")
 
 
+class ReservationPaymentStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Reservation
+        fields = ("paid",)
+
+
+class RestaurantReservationsListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Reservation
+        fields = ("reserved_time", "reserved_time_end", "table_number")
+
+
+class UserReservationsListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Reservation
+        fields = ("reserved_time", "reserved_time_end", "table_number")
+
+
 class EmployeeSerializerEditableFields(serializers.ModelSerializer):
 
     class Meta:
@@ -78,6 +83,13 @@ class EmployeeDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = ("name", "surname", "account_number", "tips_daily", "tips_monthly", "tips_overall")
+
+
+class EmployeesListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Employee
+        fields = ("name", "surname")
 
 
 class EmployeeSerializerForAddingReservation(serializers.ModelSerializer):
