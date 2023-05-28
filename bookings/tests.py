@@ -342,3 +342,36 @@ class ReservationSystemTests(APITestCase):
         self.client.delete(reverse("cancel_table_reservation", kwargs={"pk": obj.id}))
 
         self.assertEqual(Reservation.objects.all().count(), initial_count - 1)
+
+    def test_now_available_tables_listview_status_code_if_authenticated(self):
+        self.client.login(username='testuser11', password='TestSecret11!')
+        response = self.client.get("/api/v1/bookings/tables/now_available_all/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_now_available_tables_listview_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser11', password='TestSecret11!')
+        response = self.client.get(reverse("now_available_tables"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_now_available_tables_listview_status_code_if_not_authenticated(self):
+        response = self.client.get(reverse("now_available_tables"))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_now_available_tables_listview_contains_all_tables(self):
+        self.client.login(username='testuser11', password='TestSecret11!')
+        response = self.client.get(reverse("available_tables"))
+        self.assertEqual(len(response.data), Table.objects.count())
+
+    # def test_now_available_tables_listview_contains_correct_tables_data(self):
+    #     self.client.login(username='testuser11', password='TestSecret11!')
+    #     response = self.client.get(reverse("available_tables"))
+    #
+    #     for table in Table.objects.all():
+    #         self.assertContains(response, table.capacity)
+    #         self.assertContains(response, table.location)
+    #         self.assertContains(response, "Maniana")
+    #         self.assertContains(response, "Guga")
+    #
+    #         reservations = table.reservation.all()
+    #         for reservation in reservations:
+    #             self.assertContains(response, reservation.table_number)
