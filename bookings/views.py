@@ -4,6 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
 from django.utils import timezone
 from django.utils.dateparse import parse_date
+from django.db.models import Q
 from datetime import timedelta
 
 
@@ -51,8 +52,8 @@ class NowAvailableTablesView(ListAPIView):
         if capacity:
             queryset = queryset.filter(capacity=capacity)
 
-        queryset = queryset.exclude(tables_reserved__reserved_time__lte=current_time,
-                                    tables_reserved__reserved_time_end__gt=current_time)
+        queryset = queryset.exclude(reservation__reserved_time__lte=current_time,
+                                    reservation__reserved_time_end__gt=current_time)
 
         return queryset
 
