@@ -10,7 +10,7 @@ from .views import AvailableTablesView, TableReservationView, TableDetailsView, 
 urlpatterns = [
     path('tables/available/', AvailableTablesView.as_view(), name='available_tables'),  # Tested
     path('tables/available/<int:pk>', TableDetailsView.as_view(), name='table_details'),    # Tested
-    path('tables/now_available_all', NowAvailableTablesView.as_view(),
+    path('tables/now_available_all/', NowAvailableTablesView.as_view(),
          name='now_available_tables'),  # To test
     path('tables/available/reserv/<int:pk>', TableReservationView.as_view(), name='table_reservation'), # Tested
     path('tables/available/cancel_reserv/<int:pk>', CancelTableReservationView.as_view(),
@@ -31,9 +31,4 @@ urlpatterns = [
          name='all_employee_reservations')  # To test
 
 ]
-
-# All user reservation endpoint (test)
-# All restaurant reservation endpoint (test)
-# List all employee from restaurant (test)
-# Endpoint to change status of reservation to paid. (test)
 
