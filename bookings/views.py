@@ -4,7 +4,6 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
 from django.utils import timezone
 from django.utils.dateparse import parse_date
-from django.db.models import Q
 from datetime import timedelta
 
 
@@ -13,7 +12,7 @@ from .serializers import TableSerializer, ReservationSerializerEditableFields, R
     EmployeesListSerializer, UserReservationsListSerializer, RestaurantReservationsListSerializer, \
     ReservationPaymentStatusSerializer
 from .models import Table, Reservation, Employee
-from .permissions import IsOwnerOrAdmin
+from .permissions import IsOwnerOrAdmin, IsOwnerOrAdminGET
 
 
 class AvailableTablesView(ListAPIView):
@@ -96,6 +95,7 @@ class CancelTableReservationView(DestroyAPIView):
 class ReservationDetailsView(RetrieveAPIView):
     queryset = Reservation.objects.all()
     serializer_class = ReservationDetailsSerializer
+    permission_classes = (IsOwnerOrAdminGET,)
     lookup_field = 'pk'
 
 

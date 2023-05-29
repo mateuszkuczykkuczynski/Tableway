@@ -11,11 +11,11 @@ urlpatterns = [
     path('tables/available/', AvailableTablesView.as_view(), name='available_tables'),  # Tested
     path('tables/available/<int:pk>', TableDetailsView.as_view(), name='table_details'),    # Tested
     path('tables/now_available_all/', NowAvailableTablesView.as_view(),
-         name='now_available_tables'),  # To test
+         name='now_available_tables'),  # Tested
     path('tables/available/reserv/<int:pk>', TableReservationView.as_view(), name='table_reservation'), # Tested
     path('tables/available/cancel_reserv/<int:pk>', CancelTableReservationView.as_view(),
          name='cancel_table_reservation'),  # Tested
-    path('tables/reservation_details/<int:pk>', ReservationDetailsView.as_view(), name='reservation_details'),  # To test
+    path('tables/reservation_details/<int:pk>', ReservationDetailsView.as_view(), name='reservation_details'),  # Tested
     path('tables/reservation_payment_status/<int:pk>', ReservationPaymentStatusView.as_view(),
          name='reservation_payment_status'),    # To test
     path('tables/reservation_add_service/<int:pk>', ReservationAddServiceView.as_view(),

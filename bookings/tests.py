@@ -73,8 +73,24 @@ class ReservationSystemTests(APITestCase):
             more_than_four_seats_tables=4,
         )
 
+        cls.user5 = get_user_model().objects.create_user(
+            username="testuser55",
+            email="testuser55@gmail.com",
+            password="TestSecret55!",
+            name="Tysiek",
+            surname="Tysiowski",
+            is_restaurant=True,
+            restaurant_name="Tysiownia",
+            restaurant_address="Zimna 77",
+            restaurant_type="Polish",
+            two_seats_tables=8,
+            four_seats_tables=6,
+            more_than_four_seats_tables=4,
+        )
+
         cls.restaurant_1 = Restaurant.objects.get(name="Darkownia")
         cls.restaurant_2 = Restaurant.objects.get(name="Ryszariada")
+        cls.restaurant_3 = Restaurant.objects.get(name="Tysiownia")
 
         cls.table1 = Table.objects.create(
             location=cls.restaurant_1,
@@ -93,6 +109,28 @@ class ReservationSystemTests(APITestCase):
             capacity=4,
         )
         cls.table3.reservation.set([])
+
+        cls.table4 = Table.objects.create(
+            location=cls.restaurant_3,
+            capacity=4,
+        )
+        cls.table3.reservation.set([])
+
+        cls.reservation1 = Reservation.objects.create(
+            reserved_time="2023-11-11T18:48:41.193000Z",
+            reserved_time_end="2023-11-11T19:48:41.193000Z",
+            table_number=cls.table4,
+            owner=cls.user5,
+
+        )
+
+        cls.reservation2 = Reservation.objects.create(
+            reserved_time="2023-11-15T18:48:41.193000Z",
+            reserved_time_end="2023-11-15T20:48:41.193000Z",
+            table_number=cls.table4,
+            owner=cls.user4,
+
+        )
 
     def test_available_tables_listview_status_code_if_authenticated(self):
         self.client.login(username='testuser11', password='TestSecret11!')
@@ -327,7 +365,7 @@ class ReservationSystemTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_cancel_table_reserv_delete_method_correctly_deletes_data_from_fb(self):
+    def test_cancel_table_reserv_delete_method_correctly_deletes_data_from_db(self):
         self.client.login(username='testuser44', password='TestSecret44!')
         data = {
             "reserved_time": "2023-08-20T00:45:00.725Z",
@@ -359,19 +397,82 @@ class ReservationSystemTests(APITestCase):
 
     def test_now_available_tables_listview_contains_all_tables(self):
         self.client.login(username='testuser11', password='TestSecret11!')
-        response = self.client.get(reverse("available_tables"))
+        response = self.client.get(reverse("now_available_tables"))
         self.assertEqual(len(response.data), Table.objects.count())
 
-    # def test_now_available_tables_listview_contains_correct_tables_data(self):
-    #     self.client.login(username='testuser11', password='TestSecret11!')
-    #     response = self.client.get(reverse("available_tables"))
+    def test_now_available_tables_listview_contains_correct_data(self):
+        self.client.login(username='testuser11', password='TestSecret11!')
+        response = self.client.get(reverse("available_tables"))
+
+        self.assertContains(response, self.restaurant_1.name)
+        self.assertContains(response, self.restaurant_2.name)
+        self.assertContains(response, self.restaurant_3.name)
+        self.assertContains(response, self.table1.capacity)
+        self.assertContains(response, self.table2.capacity)
+        self.assertContains(response, self.table3.capacity)
+        self.assertContains(response, self.table4.capacity)
+        self.assertContains(response, self.table1.id)
+        self.assertContains(response, self.table2.id)
+        self.assertContains(response, self.table3.id)
+        self.assertContains(response, self.table4.id)
+
+        reservations = self.table4.reservation.all()
+        for reservation in reservations:
+            self.assertContains(response, reservation.reserved_time)
+            self.assertContains(response, reservation.reserved_time_end)
+
+    def test_reservation_details_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser55', password='TestSecret55!')
+        response = self.client.get(f"/api/v1/bookings/tables/reservation_details/{self.reservation1.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_reservation_details_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser55', password='TestSecret55!')
+        response = self.client.get(reverse("reservation_details", kwargs={"pk": self.reservation1.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_reservation_details_view_status_code_if_authenticated_and_not_autorized(self):
+        self.client.login(username='testuser11', password='TestSecret11!')
+        response = self.client.get(reverse("reservation_details", kwargs={"pk": self.reservation1.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_reservation_details_view_status_code_if_not_authenticated(self):
+        response = self.client.get(reverse("reservation_details", kwargs={"pk": self.reservation1.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_reservation_details_view_status_code_if_reservation_not_exists(self):
+        self.client.login(username='testuser55', password='TestSecret55!')
+        response = self.client.get(reverse("reservation_details", kwargs={"pk": 9696}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_reservation_details_view_contains_correct_reservation_data(self):
+        self.client.login(username='testuser55', password='TestSecret55!')
+        response = self.client.get(reverse("reservation_details", kwargs={"pk": self.reservation1.id}))
+        self.assertContains(response, self.reservation1.reserved_time)
+        self.assertContains(response, self.reservation1.reserved_time_end)
+        self.assertContains(response, self.reservation1.table_number.id)
+        self.assertContains(response, self.reservation1.owner.id)
+
+    def test_reservation_payment_status_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        response = self.client.get(f"/api/v1/bookings/tables/reservation_payment_status/{self.reservation2.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    # def test_reservation_payment_status_status_code_if_authenticated_by_name(self):
+    #     self.client.login(username='testuser44', password='TestSecret44!')
+    #     response = self.client.get(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    # def test_reservation_payment_status_status_code_if_authenticated_and_not_autorized(self):
+    #     self.client.login(username='testuser22', password='TestSecret22!')
+    #     response = self.client.get(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # def test_reservation_payment_status_status_code_if_not_authenticated(self):
+    #     response = self.client.get(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     #
-    #     for table in Table.objects.all():
-    #         self.assertContains(response, table.capacity)
-    #         self.assertContains(response, table.location)
-    #         self.assertContains(response, "Maniana")
-    #         self.assertContains(response, "Guga")
-    #
-    #         reservations = table.reservation.all()
-    #         for reservation in reservations:
-    #             self.assertContains(response, reservation.table_number)
+    # def test_reservation_payment_status_status_code_if_reservation_not_exists(self):
+    #     self.client.login(username='testuser55', password='TestSecret55!')
+    #     response = self.client.get(reverse("reservation_payment_status", kwargs={"pk": 5005}))
+    #     self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
