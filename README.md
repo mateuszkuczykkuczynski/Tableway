@@ -10,3 +10,4 @@ Actually working on app basics.
 - Currently working on possibility to create list of reservation connect to one table (now table can only contain one reservation) [DONE]. 
 - Actually fixing Country/ City field (user not able to choose) [DONE] and writing some tests. 
 - 20.05.2023 App is in tests phase.
+- 30.05.2023 Tests phase for bookings app is almost done [need few more fixes].
