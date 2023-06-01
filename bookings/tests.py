@@ -4,7 +4,7 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 from datetime import datetime
 
-from .models import Table, Restaurant, Reservation
+from .models import Table, Restaurant, Reservation, Employee
 
 User = get_user_model()
 
@@ -131,6 +131,24 @@ class ReservationSystemTests(APITestCase):
             owner=cls.user4,
 
         )
+
+        cls.reservation3 = Reservation.objects.create(
+            reserved_time="2023-11-02T18:44:41.193000Z",
+            reserved_time_end="2023-11-02T20:44:41.193000Z",
+            table_number=cls.table4,
+            owner=cls.user5,
+
+        )
+
+
+
+        # cls.employee1 = Employee.objects.create(
+        #     name="Radek",
+        #     surname="Radzi",
+        #     reservation_served=cls.reservation2,
+        #     works_in=cls.restaurant_2,
+        #     account_number=554499001212,
+        # )
 
     def test_available_tables_listview_status_code_if_authenticated(self):
         self.client.login(username='testuser11', password='TestSecret11!')
@@ -455,24 +473,71 @@ class ReservationSystemTests(APITestCase):
 
     def test_reservation_payment_status_view_status_code_if_authenticated(self):
         self.client.login(username='testuser44', password='TestSecret44!')
-        response = self.client.get(f"/api/v1/bookings/tables/reservation_payment_status/{self.reservation2.id}")
+        data = {
+            "paid": True
+        }
+        response = self.client.put(f"/api/v1/bookings/tables/reservation_payment_status/{self.reservation2.id}",
+                                   data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # def test_reservation_payment_status_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testuser44', password='TestSecret44!')
-    #     response = self.client.get(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_reservation_payment_status_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
+            "paid": True
+        }
+        response = self.client.put(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id},
+                                           ), data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # def test_reservation_payment_status_status_code_if_authenticated_and_not_autorized(self):
-    #     self.client.login(username='testuser22', password='TestSecret22!')
-    #     response = self.client.get(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_reservation_payment_status_status_code_if_authenticated_and_not_autorized(self):
+        self.client.login(username='testuser22', password='TestSecret22!')
+        data = {
+            "paid": True
+        }
+        response = self.client.put(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id},
+                                           ), data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_reservation_payment_status_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_reservation_payment_status_status_code_if_reservation_not_exists(self):
-    #     self.client.login(username='testuser55', password='TestSecret55!')
-    #     response = self.client.get(reverse("reservation_payment_status", kwargs={"pk": 5005}))
-    #     self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    def test_reservation_payment_status_status_code_if_not_authenticated(self):
+        data = {
+            "paid": True
+        }
+        response = self.client.put(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id},
+                                           ), data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_reservation_payment_status_status_code_if_reservation_not_exists(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
+            "paid": True
+        }
+        response = self.client.put(reverse("reservation_payment_status", kwargs={"pk": 6666},
+                                           ), data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_reservation_payment_status_view_contains_correct_reservation_data(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
+            "paid": True
+        }
+        response = self.client.put(f"/api/v1/bookings/tables/reservation_payment_status/{self.reservation2.id}",
+                                   data=data, format="json")
+        self.assertContains(response, "paid")
+
+    def test_reservation_add_service_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
+            "paid": True
+        }
+        response = self.client.put(f"/api/v1/bookings/tables/reservation_payment_status/{self.reservation2.id}",
+                                   data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_reservation_add_service_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser44', password='TestSecret44!')
+        data = {
+            "paid": True
+        }
+        response = self.client.put(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id},
+                                           ), data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
