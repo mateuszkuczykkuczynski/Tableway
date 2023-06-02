@@ -48,7 +48,7 @@ class ReservationDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ("reserved_time", "reserved_time_end", "table_number", "owner")
+        fields = ("reserved_time", "reserved_time_end", "table_number", "owner", "service")
 
 
 class ReservationPaymentStatusSerializer(serializers.ModelSerializer):

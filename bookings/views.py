@@ -12,7 +12,7 @@ from .serializers import TableSerializer, ReservationSerializerEditableFields, R
     EmployeesListSerializer, UserReservationsListSerializer, RestaurantReservationsListSerializer, \
     ReservationPaymentStatusSerializer
 from .models import Table, Reservation, Employee
-from .permissions import IsOwnerOrAdmin, IsOwnerOrAdminGET
+from .permissions import IsOwnerOrAdmin, IsOwnerOrAdminGET, IsOwnerOrAdminPUT, IsOwnerOrAdminAddService
 
 
 class AvailableTablesView(ListAPIView):
@@ -103,14 +103,15 @@ class ReservationDetailsView(RetrieveAPIView):
 class ReservationPaymentStatusView(UpdateAPIView):
     serializer_class = ReservationPaymentStatusSerializer
     queryset = Reservation.objects.all()
+    permission_classes = (IsOwnerOrAdminPUT,)
 
-    def perform_update(self, serializer):
-        if not self.request.user.is_superuser or \
-                self.request.user != serializer.instance.owner or \
-                self.request.user != serializer.instance.service:
-            raise PermissionDenied("You don't have permission to add service to this reservation.")
-
-        serializer.save()
+    # def perform_update(self, serializer):
+    #     if not self.request.user.is_superuser or \
+    #            not self.request.user != serializer.instance.owner or \
+    #             not self.request.user != serializer.instance.service:
+    #         raise PermissionDenied("You don't have permission to add service to this reservation.")
+    #
+    #     serializer.save()
 
 
 # TODO: Test
@@ -149,13 +150,13 @@ class AllRestaurantReservationsView(ListAPIView):
 class ReservationAddServiceView(UpdateAPIView):
     queryset = Reservation.objects.all()
     serializer_class = AddEmployeeToReservationSerializer
-    permission_classes = (IsOwnerOrAdmin,)
+    permission_classes = (IsOwnerOrAdminAddService,)
 
-    def perform_update(self, serializer):
-        if not self.request.user.is_superuser and self.request.user != serializer.instance.owner:
-            raise PermissionDenied("You don't have permission to add service to this reservation.")
-
-        serializer.save()
+    # def perform_update(self, serializer):
+    #     if not self.request.user.is_superuser and self.request.user != serializer.instance.owner:
+    #         raise PermissionDenied("You don't have permission to add service to this reservation.")
+    #
+    #     serializer.save()
 
 
 class EmployeeCreateView(CreateAPIView):
