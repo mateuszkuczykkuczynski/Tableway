@@ -136,19 +136,16 @@ class ReservationSystemTests(APITestCase):
             reserved_time="2023-11-02T18:44:41.193000Z",
             reserved_time_end="2023-11-02T20:44:41.193000Z",
             table_number=cls.table4,
-            owner=cls.user5,
+            owner=cls.user1,
 
         )
 
-
-
-        # cls.employee1 = Employee.objects.create(
-        #     name="Radek",
-        #     surname="Radzi",
-        #     reservation_served=cls.reservation2,
-        #     works_in=cls.restaurant_2,
-        #     account_number=554499001212,
-        # )
+        cls.employee1 = Employee.objects.create(
+            name="Radek",
+            surname="Radzi",
+            works_in=cls.restaurant_3,
+            account_number=554499001212,
+        )
 
     def test_available_tables_listview_status_code_if_authenticated(self):
         self.client.login(username='testuser11', password='TestSecret11!')
@@ -515,6 +512,7 @@ class ReservationSystemTests(APITestCase):
                                            ), data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    # Have to be changer from str "service" to field from model in future (example: Reservation.service)
     def test_reservation_payment_status_view_contains_correct_reservation_data(self):
         self.client.login(username='testuser44', password='TestSecret44!')
         data = {
@@ -525,19 +523,67 @@ class ReservationSystemTests(APITestCase):
         self.assertContains(response, "paid")
 
     def test_reservation_add_service_view_status_code_if_authenticated(self):
-        self.client.login(username='testuser44', password='TestSecret44!')
+        self.client.login(username='testuser55', password='TestSecret55!')
         data = {
-            "paid": True
+            "service": self.employee1.id
         }
-        response = self.client.put(f"/api/v1/bookings/tables/reservation_payment_status/{self.reservation2.id}",
+        response = self.client.put(f"/api/v1/bookings/tables/reservation_add_service/{self.reservation3.id}",
                                    data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_reservation_add_service_view_status_code_if_authenticated_by_name(self):
-        self.client.login(username='testuser44', password='TestSecret44!')
+        self.client.login(username='testuser55', password='TestSecret55!')
         data = {
-            "paid": True
+            "service": self.employee1.id
         }
-        response = self.client.put(reverse("reservation_payment_status", kwargs={"pk": self.reservation2.id},
+        response = self.client.put(reverse("reserv_add_service", kwargs={"pk": self.reservation3.id},
                                            ), data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_reservation_add_service_view_status_code_if_authenticated_and_not_autorized(self):
+        self.client.login(username='testuser22', password='TestSecret22!')
+        data = {
+            "service": self.employee1.id
+        }
+        response = self.client.put(reverse("reserv_add_service", kwargs={"pk": self.reservation3.id},
+                                           ), data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_reservation_add_service_view_status_code_if_not_authenticated(self):
+        data = {
+            "service": self.employee1.id
+        }
+        response = self.client.put(reverse("reserv_add_service", kwargs={"pk": self.reservation3.id},
+                                           ), data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_reservation_add_service_view_status_code_if_reservation_not_exists(self):
+        self.client.login(username='testuser55', password='TestSecret55!')
+        data = {
+            "service": self.employee1.id
+        }
+        response = self.client.put(reverse("reserv_add_service", kwargs={"pk": 7007},
+                                           ), data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # Have to be changer from str "service" to field from model in future (example: Reservation.service)
+    def test_reservation_add_service_view_contains_correct_reservation_fields(self):
+        self.client.login(username='testuser55', password='TestSecret55!')
+        data = {
+            "service": self.employee1.id
+        }
+        response = self.client.put(reverse("reserv_add_service", kwargs={"pk": self.reservation3.id},
+                                           ), data=data, format="json")
+        self.assertContains(response, "service")
+
+    def test_reservation_add_service_view_contains_correctly_saves_data_in_db(self):
+        self.client.login(username='testuser55', password='TestSecret55!')
+        data = {
+            "service": self.employee1.id
+        }
+        self.client.put(reverse("reserv_add_service", kwargs={"pk": self.reservation3.id},
+                                ), data=data, format="json")
+
+        updated_reserv = Reservation.objects.get(id=self.reservation3.id)
+        self.assertEqual(self.employee1, updated_reserv.service)
+
