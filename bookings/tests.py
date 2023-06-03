@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from datetime import datetime
+from datetime import datetime, date
 
 from .models import Table, Restaurant, Reservation, Employee
 
@@ -88,6 +88,15 @@ class ReservationSystemTests(APITestCase):
             more_than_four_seats_tables=4,
         )
 
+        cls.user6 = get_user_model().objects.create_user(
+            username="testuser66",
+            email="testuser66@gmail.com",
+            password="TestSecret66!",
+            name="TenBez",
+            surname="Restauracji",
+            is_restaurant=False,
+        )
+
         cls.restaurant_1 = Restaurant.objects.get(name="Darkownia")
         cls.restaurant_2 = Restaurant.objects.get(name="Ryszariada")
         cls.restaurant_3 = Restaurant.objects.get(name="Tysiownia")
@@ -114,7 +123,7 @@ class ReservationSystemTests(APITestCase):
             location=cls.restaurant_3,
             capacity=4,
         )
-        cls.table3.reservation.set([])
+        cls.table4.reservation.set([])
 
         cls.reservation1 = Reservation.objects.create(
             reserved_time="2023-11-11T18:48:41.193000Z",
@@ -137,6 +146,30 @@ class ReservationSystemTests(APITestCase):
             reserved_time_end="2023-11-02T20:44:41.193000Z",
             table_number=cls.table4,
             owner=cls.user1,
+
+        )
+
+        cls.reservation4 = Reservation.objects.create(
+            reserved_time="2023-12-19T18:48:41.193000Z",
+            reserved_time_end="2023-12-19T19:48:41.193000Z",
+            table_number=cls.table2,
+            owner=cls.user6,
+
+        )
+
+        cls.reservation5 = Reservation.objects.create(
+            reserved_time="2023-12-02T18:48:41.193000Z",
+            reserved_time_end="2023-12-02T20:48:41.193000Z",
+            table_number=cls.table2,
+            owner=cls.user6,
+
+        )
+
+        cls.reservation6 = Reservation.objects.create(
+            reserved_time="2023-02-08T18:44:41.193000Z",
+            reserved_time_end="2023-11-08T20:44:41.193000Z",
+            table_number=cls.table2,
+            owner=cls.user6,
 
         )
 
@@ -587,3 +620,127 @@ class ReservationSystemTests(APITestCase):
         updated_reserv = Reservation.objects.get(id=self.reservation3.id)
         self.assertEqual(self.employee1, updated_reserv.service)
 
+    def test_all_restaurant_reservations_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser33', password='TestSecret33!')
+
+        response = self.client.get(f"/api/v1/bookings/tables/all_restaurant_reservations/{self.restaurant_1.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_all_restaurant_reservations_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser33', password='TestSecret33!')
+
+        response = self.client.get(
+            reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_all_restaurant_reservations_view_status_code_if_and_not_autorized(self):
+        self.client.login(username='testuser66', password='TestSecret66!')
+        response = self.client.get(
+            reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_all_restaurant_reservations_view_status_code_if_not_authenticated(self):
+        response = self.client.get(
+            reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_all_restaurant_reservations_view_status_code_if_restaurant_not_exists(self):
+        self.client.login(username='testuser33', password='TestSecret33!')
+
+        response = self.client.get(
+            reverse("all_restaurant_reservations", kwargs={"restaurant_id": 7007}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_all_restaurant_reservations_view_contains_correct_reservation_fields_names(self):
+        self.client.login(username='testuser33', password='TestSecret33!')
+        response = self.client.get(
+            reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertContains(response, "reserved_time")
+        self.assertContains(response, "reserved_time_end")
+        self.assertContains(response, "table_number")
+
+    def test_all_restaurant_reservations_view_contains_correct_reservations_data(self):
+        self.client.login(username='testuser33', password='TestSecret33!')
+        response = self.client.get(
+            reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertContains(response, self.reservation4.reserved_time)
+        self.assertContains(response, self.reservation4.reserved_time_end)
+        self.assertContains(response, self.reservation4.table_number)
+        self.assertContains(response, self.reservation5.reserved_time)
+        self.assertContains(response, self.reservation5.reserved_time_end)
+        self.assertContains(response, self.reservation5.table_number)
+        self.assertContains(response, self.reservation6.reserved_time)
+        self.assertContains(response, self.reservation6.reserved_time_end)
+        self.assertContains(response, self.reservation46.table_number)
+
+    #   Tests passed but functionality is not ready yet. CHeck for later.
+    def test_all_restaurant_reservations_view_status_code_if_additional_query_params(self):
+        date_param = str(date.today())
+        self.client.login(username='testuser33', password='TestSecret33!')
+        response = self.client.get(
+            f"/api/v1/bookings/tables/all_restaurant_reservations/{self.restaurant_1.id}/date={date_param}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    #   Tests passed but functionality is not ready yet. CHeck for later.
+    def test_all_restaurant_reservations_view_status_code_if_additional_query_params_by_name(self):
+        date_param = str(date.today())
+        self.client.login(username='testuser33', password='TestSecret33!')
+        url = self.client.get(
+            reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
+        response = self.client.get(url, data={"date": date_param})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    # Check from here
+    def test_all_user_reservations_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser66', password='TestSecret66!')
+
+        response = self.client.get(f"/api/v1/bookings/tables/all_user_reservations/{self.user6.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_all_user_reservations_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser66', password='TestSecret66!')
+
+        response = self.client.get(
+            reverse("all_user_reservations", kwargs={"pk": self.user6.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_all_user_reservations_view_status_code_if_and_not_autorized(self):
+        self.client.login(username='testuser22', password='TestSecret22!')
+        response = self.client.get(
+            reverse("all_user_reservations", kwargs={"pk": self.user6.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_all_user_reservations_view_status_code_if_not_authenticated(self):
+        response = self.client.get(
+            reverse("all_user_reservations", kwargs={"pk": self.user6.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_all_user_reservations_view_status_code_if_user_not_exists(self):
+        self.client.login(username='testuser66', password='TestSecret66!')
+
+        response = self.client.get(
+            reverse("all_restaurant_reservations", kwargs={"pk": 420024}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # def test_all_user_reservations_view_contains_correct_reservation_fields_names(self):
+    #     self.client.login(username='testuser33', password='TestSecret33!')
+    #     response = self.client.get(
+    #         reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
+    #     self.assertContains(response, "reserved_time")
+    #     self.assertContains(response, "reserved_time_end")
+    #     self.assertContains(response, "table_number")
+
+    # def test_all_user_reservations_view_contains_correct_reservations_data(self):
+    #     self.client.login(username='testuser33', password='TestSecret33!')
+    #     response = self.client.get(
+    #         reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
+    #     self.assertContains(response, self.reservation4.reserved_time)
+    #     self.assertContains(response, self.reservation4.reserved_time_end)
+    #     self.assertContains(response, self.reservation4.table_number)
+    #     self.assertContains(response, self.reservation5.reserved_time)
+    #     self.assertContains(response, self.reservation5.reserved_time_end)
+    #     self.assertContains(response, self.reservation5.table_number)
+    #     self.assertContains(response, self.reservation6.reserved_time)
+    #     self.assertContains(response, self.reservation6.reserved_time_end)
+    #     self.assertContains(response, self.reservation46.table_number)
+    #
