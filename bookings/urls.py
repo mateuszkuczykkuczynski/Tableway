@@ -19,10 +19,10 @@ urlpatterns = [
     path('tables/reservation_payment_status/<int:pk>', ReservationPaymentStatusView.as_view(),
          name='reservation_payment_status'),    # Tested
     path('tables/reservation_add_service/<int:pk>', ReservationAddServiceView.as_view(),
-         name='reserv_add_service'),    # To test
+         name='reserv_add_service'),    # Tested
     path('tables/all_restaurant_reservations/<int:restaurant_id>', AllRestaurantReservationsView.as_view(),
-         name='all_restaurant_reservations'),   # To test
-    path('tables/all_user_reservation', AllUserReservationsView.as_view(),
+         name='all_restaurant_reservations'),   # Tested (some fixes needed)
+    path('tables/all_user_reservations/<int:pk>', AllUserReservationsView.as_view(),
          name='all_user_reservations'),     # To test
     path('employees/employee_create/', EmployeeCreateView.as_view(), name='employee_create'),   # To test
     path('employees/employee_details/<int:pk>', EmployeeDetailsView.as_view(), name='employee_details'),    # To test
