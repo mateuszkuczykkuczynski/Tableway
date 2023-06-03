@@ -4,6 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
 from django.utils import timezone
 from django.utils.dateparse import parse_date
+from django.shortcuts import get_object_or_404
 from datetime import timedelta
 
 
@@ -12,7 +13,8 @@ from .serializers import TableSerializer, ReservationSerializerEditableFields, R
     EmployeesListSerializer, UserReservationsListSerializer, RestaurantReservationsListSerializer, \
     ReservationPaymentStatusSerializer
 from .models import Table, Reservation, Employee
-from .permissions import IsOwnerOrAdmin, IsOwnerOrAdminGET, IsOwnerOrAdminPUT, IsOwnerOrAdminAddService
+from .permissions import IsOwnerOrAdmin, IsOwnerOrAdminGET, IsOwnerOrAdminPUT, IsOwnerOrAdminAddService, \
+    IsOwnerOrAdminGetList, IsOwnerOrAdminUserReservations
 
 
 class AvailableTablesView(ListAPIView):
@@ -117,20 +119,27 @@ class ReservationPaymentStatusView(UpdateAPIView):
 # TODO: Test
 class AllUserReservationsView(ListAPIView):
     serializer_class = UserReservationsListSerializer
+    permission_classes = (IsOwnerOrAdminUserReservations,)
 
     def get_queryset(self):
-        queryset = Reservation.objects.all()
-        reservation_owner = self.request.query_params.get('owner', None)
-
-        if reservation_owner:
-            queryset = queryset.filter(owner=reservation_owner)
-
+        owner = self.kwargs['pk']
+        if owner == self.request.user.id:
+            queryset = Reservation.objects.filter(owner_id=owner)
+        else:
+            raise PermissionDenied("You don't have permission to view this user's reservations.")
         return queryset
+
+        # queryset = Reservation.objects.all()
+        # user_reservations = self.request.query_params.get('owner', None)
+        # if reservation_owner:
+        #     queryset = queryset.filter(owner=reservation_owner)
+        # queryset = Reservation.objects.get_object_or_404(owner=owner)
 
 
 # TODO: Test.
 class AllRestaurantReservationsView(ListAPIView):
     serializer_class = RestaurantReservationsListSerializer
+    permission_classes = (IsOwnerOrAdminGetList,)
 
     def get_queryset(self):
         queryset = Reservation.objects.all()
