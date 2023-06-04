@@ -5,6 +5,7 @@ from rest_framework import status
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.shortcuts import get_object_or_404
+from django.shortcuts import Http404
 from datetime import timedelta
 
 
@@ -127,13 +128,10 @@ class AllUserReservationsView(ListAPIView):
             queryset = Reservation.objects.filter(owner_id=owner)
         else:
             raise PermissionDenied("You don't have permission to view this user's reservations.")
-        return queryset
 
-        # queryset = Reservation.objects.all()
-        # user_reservations = self.request.query_params.get('owner', None)
-        # if reservation_owner:
-        #     queryset = queryset.filter(owner=reservation_owner)
-        # queryset = Reservation.objects.get_object_or_404(owner=owner)
+        if not queryset.exists(): # or get_object_or_404(queryset)
+            raise Http404("No reservations found for this user.")
+        return queryset
 
 
 # TODO: Test.
