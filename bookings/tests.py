@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from datetime import datetime, date
+from urllib.parse import urlencode
 
 from .models import Table, Restaurant, Reservation, Employee
 
@@ -665,29 +666,30 @@ class ReservationSystemTests(APITestCase):
             reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
         self.assertContains(response, self.reservation4.reserved_time)
         self.assertContains(response, self.reservation4.reserved_time_end)
-        self.assertContains(response, self.reservation4.table_number)
+        self.assertContains(response, self.reservation4.table_number.id)
         self.assertContains(response, self.reservation5.reserved_time)
         self.assertContains(response, self.reservation5.reserved_time_end)
-        self.assertContains(response, self.reservation5.table_number)
+        self.assertContains(response, self.reservation5.table_number.id)
         self.assertContains(response, self.reservation6.reserved_time)
         self.assertContains(response, self.reservation6.reserved_time_end)
-        self.assertContains(response, self.reservation46.table_number)
+        self.assertContains(response, self.reservation6.table_number.id)
 
     #   Tests passed but functionality is not ready yet. CHeck for later.
     def test_all_restaurant_reservations_view_status_code_if_additional_query_params(self):
         date_param = str(date.today())
         self.client.login(username='testuser33', password='TestSecret33!')
         response = self.client.get(
-            f"/api/v1/bookings/tables/all_restaurant_reservations/{self.restaurant_1.id}/date={date_param}")
+            f"/api/v1/bookings/tables/all_restaurant_reservations/{self.restaurant_1.id}?date={date_param}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     #   Tests passed but functionality is not ready yet. CHeck for later.
     def test_all_restaurant_reservations_view_status_code_if_additional_query_params_by_name(self):
         date_param = str(date.today())
         self.client.login(username='testuser33', password='TestSecret33!')
-        url = self.client.get(
-            reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
-        response = self.client.get(url, data={"date": date_param})
+        url = reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id})
+        query_params = urlencode({"date": date_param})
+        url_with_params = f"{url}?{query_params}"
+        response = self.client.get(url_with_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # Check from here
@@ -715,32 +717,33 @@ class ReservationSystemTests(APITestCase):
             reverse("all_user_reservations", kwargs={"pk": self.user6.id}))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    # Not possible to check reservation for other user that's why 403 status code
     def test_all_user_reservations_view_status_code_if_user_not_exists(self):
         self.client.login(username='testuser66', password='TestSecret66!')
 
         response = self.client.get(
-            reverse("all_restaurant_reservations", kwargs={"pk": 420024}))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+            reverse("all_user_reservations", kwargs={"pk": 420024}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_all_user_reservations_view_contains_correct_reservation_fields_names(self):
-    #     self.client.login(username='testuser33', password='TestSecret33!')
-    #     response = self.client.get(
-    #         reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertContains(response, "reserved_time")
-    #     self.assertContains(response, "reserved_time_end")
-    #     self.assertContains(response, "table_number")
+    def test_all_user_reservations_view_contains_correct_reservation_fields_names(self):
+        self.client.login(username='testuser66', password='TestSecret66!')
+        response = self.client.get(
+            reverse("all_user_reservations", kwargs={"pk": self.user6.id}))
+        self.assertContains(response, "reserved_time")
+        self.assertContains(response, "reserved_time_end")
+        self.assertContains(response, "table_number")
 
-    # def test_all_user_reservations_view_contains_correct_reservations_data(self):
-    #     self.client.login(username='testuser33', password='TestSecret33!')
-    #     response = self.client.get(
-    #         reverse("all_restaurant_reservations", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertContains(response, self.reservation4.reserved_time)
-    #     self.assertContains(response, self.reservation4.reserved_time_end)
-    #     self.assertContains(response, self.reservation4.table_number)
-    #     self.assertContains(response, self.reservation5.reserved_time)
-    #     self.assertContains(response, self.reservation5.reserved_time_end)
-    #     self.assertContains(response, self.reservation5.table_number)
-    #     self.assertContains(response, self.reservation6.reserved_time)
-    #     self.assertContains(response, self.reservation6.reserved_time_end)
-    #     self.assertContains(response, self.reservation46.table_number)
-    #
+    def test_all_user_reservations_view_contains_correct_reservations_data(self):
+        self.client.login(username='testuser66', password='TestSecret66!')
+        response = self.client.get(
+            reverse("all_user_reservations", kwargs={"pk": self.user6.id}))
+        self.assertContains(response, self.reservation4.reserved_time)
+        self.assertContains(response, self.reservation4.reserved_time_end)
+        self.assertContains(response, self.reservation4.table_number.id)
+        self.assertContains(response, self.reservation5.reserved_time)
+        self.assertContains(response, self.reservation5.reserved_time_end)
+        self.assertContains(response, self.reservation5.table_number.id)
+        self.assertContains(response, self.reservation6.reserved_time)
+        self.assertContains(response, self.reservation6.reserved_time_end)
+        self.assertContains(response, self.reservation6.table_number.id)
+
