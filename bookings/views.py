@@ -1,21 +1,19 @@
+from datetime import timedelta
 from rest_framework.generics import ListAPIView, DestroyAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
 from django.utils import timezone
 from django.utils.dateparse import parse_date
-from django.shortcuts import get_object_or_404
 from django.shortcuts import Http404
-from datetime import timedelta
 
-
-from .serializers import TableSerializer, ReservationSerializerEditableFields, ReservationDetailsSerializer, \
-    EmployeeSerializerEditableFields, EmployeeDetailsSerializer, AddEmployeeToReservationSerializer,\
-    EmployeesListSerializer, UserReservationsListSerializer, RestaurantReservationsListSerializer, \
-    ReservationPaymentStatusSerializer
 from .models import Table, Reservation, Employee
-from .permissions import IsOwnerOrAdmin, IsOwnerOrAdminGET, IsOwnerOrAdminPUT, IsOwnerOrAdminAddService, \
-    IsOwnerOrAdminGetList, IsOwnerOrAdminUserReservations
+from .serializers import (TableSerializer, ReservationSerializerEditableFields, ReservationDetailsSerializer,
+                          EmployeeSerializerEditableFields, EmployeeDetailsSerializer,
+                          AddEmployeeToReservationSerializer, EmployeesListSerializer, UserReservationsListSerializer,
+                          RestaurantReservationsListSerializer, ReservationPaymentStatusSerializer)
+from .permissions import (IsOwnerOrAdmin, IsOwnerOrAdminGET, IsOwnerOrAdminPUT, IsOwnerOrAdminAddService,
+                          IsOwnerOrAdminGetList, IsOwnerOrAdminUserReservations)
 
 
 class AvailableTablesView(ListAPIView):
@@ -102,25 +100,15 @@ class ReservationDetailsView(RetrieveAPIView):
     lookup_field = 'pk'
 
 
-# TODO: Test
 class ReservationPaymentStatusView(UpdateAPIView):
     serializer_class = ReservationPaymentStatusSerializer
     queryset = Reservation.objects.all()
     permission_classes = (IsOwnerOrAdminPUT,)
 
-    # def perform_update(self, serializer):
-    #     if not self.request.user.is_superuser or \
-    #            not self.request.user != serializer.instance.owner or \
-    #             not self.request.user != serializer.instance.service:
-    #         raise PermissionDenied("You don't have permission to add service to this reservation.")
-    #
-    #     serializer.save()
 
-
-# TODO: Test
 class AllUserReservationsView(ListAPIView):
     serializer_class = UserReservationsListSerializer
-    permission_classes = (IsOwnerOrAdminUserReservations,)
+    permission_classes = (IsOwnerOrAdminUserReservations,)  # Not needed, solved from in queryset (temporary solution)
 
     def get_queryset(self):
         owner = self.kwargs['pk']
@@ -129,12 +117,11 @@ class AllUserReservationsView(ListAPIView):
         else:
             raise PermissionDenied("You don't have permission to view this user's reservations.")
 
-        if not queryset.exists(): # or get_object_or_404(queryset)
+        if not queryset.exists():  # or get_object_or_404(queryset)
             raise Http404("No reservations found for this user.")
         return queryset
 
 
-# TODO: Test.
 class AllRestaurantReservationsView(ListAPIView):
     serializer_class = RestaurantReservationsListSerializer
     permission_classes = (IsOwnerOrAdminGetList,)
@@ -159,12 +146,6 @@ class ReservationAddServiceView(UpdateAPIView):
     serializer_class = AddEmployeeToReservationSerializer
     permission_classes = (IsOwnerOrAdminAddService,)
 
-    # def perform_update(self, serializer):
-    #     if not self.request.user.is_superuser and self.request.user != serializer.instance.owner:
-    #         raise PermissionDenied("You don't have permission to add service to this reservation.")
-    #
-    #     serializer.save()
-
 
 class EmployeeCreateView(CreateAPIView):
     queryset = Employee.objects.all()
@@ -185,7 +166,6 @@ class EmployeeDetailsView(RetrieveAPIView):
     lookup_field = 'pk'
 
 
-# TODO: test
 class AllRestaurantEmployeesView(ListAPIView):
     serializer_class = EmployeesListSerializer
 

@@ -1,9 +1,9 @@
+from datetime import datetime, date
+from urllib.parse import urlencode
 from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from datetime import datetime, date
-from urllib.parse import urlencode
 
 from .models import Table, Restaurant, Reservation, Employee
 
@@ -746,4 +746,3 @@ class ReservationSystemTests(APITestCase):
         self.assertContains(response, self.reservation6.reserved_time)
         self.assertContains(response, self.reservation6.reserved_time_end)
         self.assertContains(response, self.reservation6.table_number.id)
-
