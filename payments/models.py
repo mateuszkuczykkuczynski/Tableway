@@ -6,7 +6,12 @@ class Payment(models.Model):
     reservation = models.ForeignKey('bookings.Reservation', on_delete=models.SET_NULL, related_name='payments', null=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     secret = models.CharField(max_length=1000, default="", blank=True)
-    checkout_url = models.CharField(max_length=1000, default="", blank=True)
+    checkout_url = models.CharField(max_length=1000, default="", blank=True)    # For future usage
+    completed = models.BooleanField(default=False)
+
+    def payment_status(self):
+        if self.amount:
+            self.completed = True
 
     def generate_secret(self):
         self.secret = str(random.randint(10000, 99999))
@@ -17,7 +22,7 @@ class Tip(models.Model):
     reservation = models.ForeignKey('bookings.Reservation', on_delete=models.SET_NULL, related_name='tips', null=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     secret = models.CharField(max_length=1000, default="", blank=True)
-    checkout_url = models.CharField(max_length=1000, default="", blank=True)
+    checkout_url = models.CharField(max_length=1000, default="", blank=True)    # For future usage
     received = models.BooleanField(default=False)
     date = models.DateTimeField()  # To test!
 
