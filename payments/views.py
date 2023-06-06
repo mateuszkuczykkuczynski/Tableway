@@ -1,3 +1,10 @@
 from django.shortcuts import render
+from rest_framework.generics import ListAPIView, CreateAPIView
 
-# TODO views for payments app (next phase)
+from .models import Payment
+from .serializers import ReservationPayment
+
+
+class PayForReservationView(CreateAPIView):
+
+    def get_queryset(self):
