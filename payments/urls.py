@@ -1,7 +1,8 @@
 from django.urls import path
 
 from .views import (CreatePaymentView, AllRestaurantReservationsPaymentsView,AllUserReservationsPaymentsView,
-                    CompletePaymentView, TipEmployeeView, AllUserTipsView, AllEmployeeTipsView, AllRestaurantTipsView)
+                    CompletePaymentView, TipEmployeeView, AllUserTipsView, AllEmployeeTipsView, AllRestaurantTipsView,
+                    AllEmployeeTipsRestaurantOwnerView)
 # TO DO check if works fine
 urlpatterns = [
     path('payments/create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment'),
@@ -18,6 +19,6 @@ urlpatterns = [
          name='employee_all_tips'),
     path('payments/tips/restaurant_all/<int:restaurant_id>', AllRestaurantTipsView.as_view(),
          name='restaurant_all_tips'),
-
-
+    path('payments/tips/restaurant_employees/<int:employee_id>', AllEmployeeTipsRestaurantOwnerView.as_view(),
+         name='employee_all_tips'),
 ]
