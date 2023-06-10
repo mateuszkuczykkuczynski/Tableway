@@ -23,11 +23,11 @@ urlpatterns = [
          name='all_restaurant_reservations'),  # Tested (some fixes needed)
     path('tables/all_user_reservations/<int:pk>', AllUserReservationsView.as_view(),
          name='all_user_reservations'),  # Tested
-    path('employees/employee_create/', EmployeeCreateView.as_view(), name='employee_create'),  # Tested
-    path('employees/employee_details/<int:pk>', EmployeeDetailsView.as_view(), name='employee_details'),  # Tested
+    path('employees/employee_create/', EmployeeCreateView.as_view(), name='employee_create'),  # To test
+    path('employees/employee_details/<int:pk>', EmployeeDetailsView.as_view(), name='employee_details'),  # To test
     path('employees/all_restaurant_employees', AllRestaurantEmployeesView.as_view(), name='all_restaurant_employees'),
-    # Tested
+    # To test
     path('employees/all_employee_reservations', AllEmployeeReservationsView.as_view(),
-         name='all_employee_reservations')  # Tested
+         name='all_employee_reservations')  # To test
 
 ]

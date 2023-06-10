@@ -16,15 +16,14 @@ class Restaurant(models.Model):
     address = models.CharField(max_length=400)
     restaurant_type = models.CharField(max_length=50, choices=CustomUser.RESTAURANT_TYPES)
     restaurant_tables = models.ManyToManyField("bookings.Table")
-    restaurant_employees = models.ForeignKey("bookings.Employee", on_delete=models.SET_NULL, null=True, blank=True)
+    restaurant_employees = models.ForeignKey("bookings.Employee", on_delete=models.SET_NULL, null=True, blank=True,
+                                             related_name="employed_at")
 
     def __str__(self):
         return self.name
 
 
-class Employee(models.Model):
-    name = models.CharField(max_length=200)
-    surname = models.CharField(max_length=200)
+class Employee(CustomUser):
     reservation_served = models.ForeignKey("bookings.Reservation", on_delete=models.SET_NULL, null=True, blank=True)
     works_in = models.ForeignKey("bookings.Restaurant", on_delete=models.SET_NULL, null=True, blank=True)
     account_number = models.CharField(max_length=28)
