@@ -175,6 +175,9 @@ class ReservationSystemTests(APITestCase):
         )
 
         cls.employee1 = Employee.objects.create(
+            username="testemployee11",
+            email="testemployee11@gmail.com",
+            password="TestEmployeeSecret11!",
             name="Radek",
             surname="Radzi",
             works_in=cls.restaurant_3,
