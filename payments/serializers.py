@@ -1,12 +1,27 @@
 from rest_framework import serializers
+
 from .models import Payment, Tip
+from bookings.models import Reservation
 
 
 class CreatePaymentForReservationSerializer(serializers.ModelSerializer):
+    reservation_choice = serializers.PrimaryKeyRelatedField(queryset=Reservation.objects.none())
+    amount = serializers.IntegerField()
+
+    def validate_amount(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Amount cannot be negative")
+        if len(str(value)) > 8:
+            raise serializers.ValidationError("Amount cannot be bigger than eight digits")
+        return value
 
     class Meta:
         model = Payment
-        fields = ("reservation", "amount")
+        fields = ['amount', 'reservation_choice']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['reservation_choice'].queryset = self.context['reservations']
 
 
 class PaymentsDetailsSerializer(serializers.ModelSerializer):
