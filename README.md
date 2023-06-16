@@ -11,4 +11,5 @@ Actually working on app basics.
 - Actually fixing Country/ City field (user not able to choose) [DONE] and writing some tests. 
 - 20.05.2023 App is in tests phase.
 - 30.05.2023 Tests phase for bookings app is almost done [need few more fixes].
-- App is in final tests phase and funcionality check. 
+- App is in final tests phase and funcionality check.
+- App release will be delay, still working with tests and some bugfixes. 
