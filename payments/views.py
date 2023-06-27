@@ -1,6 +1,9 @@
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.exceptions import PermissionDenied
 from django.http import Http404
+from rest_framework.exceptions import NotFound
+from rest_framework.response import Response
+from rest_framework import status
 
 from bookings.models import Reservation
 from .models import Payment, Tip
@@ -8,32 +11,41 @@ from .serializers import (CreatePaymentForReservationSerializer, PaymentsDetails
                           TipEmployeeSerializer, AllUserTipsSerializer, AllEmployeeTipsSerializer,
                           AllRestaurantTipsSerializer)
 from .permissions import (IsReservationOwnerOrAdmin, IsRestaurantOwnerOrAdmin, IsTipsCreatorOrAdmin,
-                          IsRestaurantOwnerWithTipsOrAdmin)
+                          IsRestaurantOwnerWithTipsOrAdmin, IsRestaurantEmployeeOrOwnerPermission)
 
 
 class CreatePaymentView(CreateAPIView):
     serializer_class = CreatePaymentForReservationSerializer
+    permission_classes = (IsRestaurantEmployeeOrOwnerPermission,)
 
     def get_queryset(self):
-        restaurant_id = self.kwargs['restaurant_id']
-        return Reservation.objects.filter(table_number__location_id=restaurant_id, paid=False)
+        reservations = Reservation.objects.filter(
+            table_number__location_id=self.kwargs['restaurant_id'],
+            paid=False
+        )
+        if reservations.exists():
+            return reservations
+        else:
+            raise NotFound("No reservations found.")
 
     def perform_create(self, serializer):
-        restaurant_id = self.kwargs['restaurant_id']
-        # user = self.request.user # For future usage
+        reservation_id = serializer.validated_data['reservation_choice'].id
+        amount = serializer.validated_data['amount']
+        Payment.objects.create(reservation_id=reservation_id, amount=amount)
 
-        try:
-            reservation = Reservation.objects.get(
-                table_number__location_id=restaurant_id,
-                paid=False
-            )
-        except Reservation.DoesNotExist:
-            raise Http404("Reservation not found or already paid")
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['reservations'] = self.get_queryset()
+        return context
+
+    # def create(self, request, *args, **kwargs):
+    #     try:
+    #         return super().create(request, *args, **kwargs)
+    #     except NotFound:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
 
         # if not user.is_employee or not user.employee.restaurant_id == restaurant_id:
         #     raise PermissionDenied("You are not authorized to create a payment for this reservation")
-
-        serializer.save(reservation=reservation)
 
 
 class AllRestaurantReservationsPaymentsView(ListAPIView):
