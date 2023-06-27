@@ -137,6 +137,7 @@ class PaymentSystemTests(APITestCase):
                                     data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    # status code need to be checked, should be 401 not 403 
     def test_create_payment_view_status_code_if_restaurant_not_exists(self):
         self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
         data = {
@@ -207,5 +208,3 @@ class PaymentSystemTests(APITestCase):
         response = self.client.post(reverse("create_payment", kwargs={"restaurant_id": self.restaurant_1.id}),
                                     data=data, format="json")
         self.assertEqual(response.data['amount'], ["Amount cannot be bigger than eight digits"])
-
-
