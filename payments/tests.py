@@ -137,7 +137,7 @@ class PaymentSystemTests(APITestCase):
                                     data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # status code need to be checked, should be 401 not 403 
+    # status code need to be checked, should be 401 not 403
     def test_create_payment_view_status_code_if_restaurant_not_exists(self):
         self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
         data = {
@@ -208,3 +208,52 @@ class PaymentSystemTests(APITestCase):
         response = self.client.post(reverse("create_payment", kwargs={"restaurant_id": self.restaurant_1.id}),
                                     data=data, format="json")
         self.assertEqual(response.data['amount'], ["Amount cannot be bigger than eight digits"])
+
+    # In works
+    # def test_complete_payment_view_status_code_if_authenticated(self):
+    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
+    #     data = {
+    #         "reservation_choice": self.reservation1.id,
+    #         "amount": 90
+    #     }
+    #     response = self.client.post(f"/api/v1/payments/complete/{self.payment_id.id}/", data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #
+    # def test_complete_payment_view_status_code_if_authenticated_by_name(self):
+    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
+    #     data = {
+    #         "reservation_choice": self.reservation1.id,
+    #         "amount": 90
+    #     }
+    #     response = self.client.post(reverse("complete_payment", kwargs={"payment_id": self.restaurant_1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #
+    # def test_complete_payment_view_status_code_if_not_authenticated(self):
+    #     data = {
+    #         "reservation_choice": self.reservation1.id,
+    #         "amount": 90
+    #     }
+    #     response = self.client.post(reverse("complete_payment", kwargs={"payment_id": self.restaurant_1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    #
+    # def test_complete_payment_view_status_code_if_authenticated_and_not_authorized(self):
+    #     self.client.login(username='testemployee2', password='TestEmployeeSecret2!')
+    #     data = {
+    #         "reservation_choice": self.reservation1.id,
+    #         "amount": 110
+    #     }
+    #     response = self.client.post(reverse("complete_payment", kwargs={"payment_id": self.restaurant_1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    #
+    # def test_complete_payment_view_status_code_if_payment_not_exists(self):
+    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
+    #     data = {
+    #         "reservation_choice": self.reservation1.id,
+    #         "amount": 90
+    #     }
+    #     response = self.client.post(reverse("complete_payment", kwargs={"payment_id": 20202020}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
