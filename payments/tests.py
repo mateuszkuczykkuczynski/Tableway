@@ -327,3 +327,103 @@ class PaymentSystemTests(APITestCase):
     #     response = self.client.get(reverse("user_all_payments", kwargs={"restaurant_id": 20202020}),
     #                                 format="json")
     #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    # In works part 3
+    # def test_tip_employee_view_status_code_if_authenticated(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!e')
+    #     data = {
+    #         "amount": 90
+    #     }
+    #     response = self.client.post(f"/api/v1/payments/create/{self.reservation1.id}/", data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    #
+    # def test_tip_employee_view_status_code_if_authenticated_by_name(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": 90
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    #
+    # def test_tip_employee_view_status_code_if_not_authenticated(self):
+    #     data = {
+    #         "amount": 90
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    #
+    # def test_tip_employee_view_status_code_if_authenticated_and_not_authorized(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": 110
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    #
+    # # status code need to be checked, should be 401 not 403
+    # def test_tip_employee_view_status_code_if_restaurant_not_exists(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": 90
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": 20202020}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    #
+    # def test_tip_employee_view_status_code_if_amount_is_string(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": "Cyberpunk"
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    #     self.assertEqual(response.data['amount'], ["A valid integer is required."])
+    #
+    # def test_tip_employee_view_response_if_amount_is_string(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": "Cyberpunk"
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.data['amount'], ["A valid integer is required."])
+    #
+    # def test_tip_employee_view_status_code_if_amount_is_negative(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": -8008
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    #
+    # def test_tip_employee_view_response_if_amount_is_negative(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": -8008
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.data['amount'], ["Amount cannot be negative"])
+    #
+    # def test_tip_employee_view_status_code_if_amount_is_longer_then_eight_digits(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": 700790094004
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    #
+    # def test_tip_employee_view_response_if_amount_is_longer_then_eight_digits(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     data = {
+    #         "amount": 700790094004
+    #     }
+    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+    #                                 data=data, format="json")
+    #     self.assertEqual(response.data['amount'], ["Amount cannot be bigger than eight digits"])
