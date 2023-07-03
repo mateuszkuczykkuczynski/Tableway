@@ -427,3 +427,52 @@ class PaymentSystemTests(APITestCase):
     #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
     #                                 data=data, format="json")
     #     self.assertEqual(response.data['amount'], ["Amount cannot be bigger than eight digits"])
+
+    # In works part 4
+    # def test_user_all_tips_view_status_code_if_authenticated(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     response = self.client.get(f"/api/v1/payments/tips/user_all/{self.user1.id}/")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #
+    # def test_user_all_tips_view_status_code_if_authenticated_by_name(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #
+    # def test_user_all_tips_view_status_code_if_not_authenticated(self):
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    #
+    # def test_user_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    #
+    # def test_user_all_tips_view_status_code_if_payment_not_exists(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": 20202020}))
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    # def test_user_all_tips_view_status_code_if_authenticated(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     response = self.client.get(f"/api/v1/payments/tips/user_all/{self.user1.id}/")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #
+    # def test_user_all_tips_view_status_code_if_authenticated_by_name(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #
+    # def test_user_all_tips_view_status_code_if_not_authenticated(self):
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    #
+    # def test_user_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    #
+    # def test_user_all_tips_view_status_code_if_payment_not_exists(self):
+    #     self.client.login(username='testuser1', password='TestSecret1!')
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": 20202020}))
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
