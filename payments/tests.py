@@ -604,7 +604,7 @@ class PaymentSystemTests(APITestCase):
     #     response = self.client.get(f"/api/v1/payments/tips/employee_all/{self.restaurant_1.id}/")
     #     self.assertEqual(response.status_code, status.HTTP_200_OK)
     #
-    # def test_restaurant_employees_all_tipss_view_status_code_if_authenticated_by_name(self):
+    # def test_restaurant_employees_all_tips_view_status_code_if_authenticated_by_name(self):
     #     self.client.login(username='testuser1', password='TestSecret1!')
     #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
     #     self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -622,4 +622,5 @@ class PaymentSystemTests(APITestCase):
     #     self.client.login(username='testuser1', password='TestSecret1!')
     #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": 20202020}))
     #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    
+
+    # In works part 8 (TODO: additional tests in work)
