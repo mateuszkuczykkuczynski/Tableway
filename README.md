@@ -15,4 +15,5 @@ Actually working on app basics.
 - App release will be delay, still working with tests and some bugfixes. 
 - More updates coming soon. I am on vacations!
 - This update is needed only to keep up my challange to code for 365 days in a row (even if i am on vacations, like right now). [v8]
-- Now working on last test phase.
+- Now working on last test phase (last touches on tests).
+- Celery will be added as a new feature in near future! 
