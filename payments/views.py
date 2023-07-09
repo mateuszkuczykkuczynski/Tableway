@@ -70,7 +70,7 @@ class AllUserReservationsPaymentsView(ListAPIView):
 
 class CompletePaymentView(UpdateAPIView):
     serializer_class = CompletePaymentSerializer
-    permission_classes = IsReservationOwnerOrAdmin
+    permission_classes = (IsReservationOwnerOrAdmin,)
 
     def get_queryset(self):
         payment_id = self.kwargs['payment_id']
