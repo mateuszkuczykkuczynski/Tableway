@@ -92,15 +92,12 @@ class IsRestaurantEmployeeOrOwnerPermission(permissions.BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        # Pobierz identyfikator restauracji z argumentów widoku
         restaurant_id = view.kwargs.get('restaurant_id')
 
-        # Sprawdź, czy użytkownik jest właścicielem restauracji
         is_owner = Restaurant.objects.filter(id=restaurant_id, owner=request.user).exists()
         if is_owner:
             return True
 
-        # Sprawdź, czy użytkownik jest pracownikiem restauracji
         is_employee = Employee.objects.filter(works_in_id=restaurant_id, id=request.user.id).exists()
         if is_employee:
             return True
