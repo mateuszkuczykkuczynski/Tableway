@@ -5,7 +5,7 @@ from .views import (CreatePaymentView, AllRestaurantReservationsPaymentsView,All
                     AllEmployeeTipsRestaurantOwnerView)
 # TO DO check if works fine
 urlpatterns = [
-    path('create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment'),   # To test
+    path('create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment'),   # Tested (few fixes left)
     path('complete/<int:payment_id>/', CompletePaymentView.as_view(), name='complete_payment'),    # To test
     path('restaurant_all/<int:restaurant_id>/', AllRestaurantReservationsPaymentsView.as_view(),
          name='restaurant_all_payments'),   # To test
