@@ -3,7 +3,8 @@ from django.urls import path
 from .views import (CreatePaymentView, AllRestaurantReservationsPaymentsView,AllUserReservationsPaymentsView,
                     CompletePaymentView, TipEmployeeView, AllUserTipsView, AllEmployeeTipsView, AllRestaurantTipsView,
                     AllEmployeeTipsRestaurantOwnerView)
-# TO DO check if works fine
+
+# TODO check if works fine
 urlpatterns = [
     path('create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment'),   # Tested (few fixes left)
     path('complete/<int:payment_id>/', CompletePaymentView.as_view(), name='complete_payment'),    # To test
