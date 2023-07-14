@@ -5,6 +5,7 @@ from drf_spectacular.utils import extend_schema_field
 from .models import Table, Reservation, Employee
 
 
+# TODO: Refactor of file is needed because there is a lot of repeated class and functionality that should be reduced
 class TableSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.SerializerMethodField()
     reservations = serializers.SerializerMethodField()
