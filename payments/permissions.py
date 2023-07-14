@@ -5,6 +5,8 @@ from django.http import HttpResponse
 from bookings.models import Restaurant, Employee
 from .models import Tip
 
+# TODO: Refactor of file is needed because there is a lot of repeated class and functionality that should be reduced
+
 
 class IsReservationOwnerOrAdmin(permissions.BasePermission):
     """
