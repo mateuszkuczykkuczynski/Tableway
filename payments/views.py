@@ -71,10 +71,13 @@ class AllUserReservationsPaymentsView(ListAPIView):
 class CompletePaymentView(UpdateAPIView):
     serializer_class = CompletePaymentSerializer
     permission_classes = (IsReservationOwnerOrAdmin,)
+    lookup_field = 'id'
 
+    # def get_queryset(self):
+    #     payment_id = self.kwargs['payment_id']
+    #     return Payment.objects.get(id=payment_id)
     def get_queryset(self):
-        payment_id = self.kwargs['payment_id']
-        return Payment.objects.get(id=payment_id)
+        return Payment.objects.all()
 
 
 class TipEmployeeView(CreateAPIView):
