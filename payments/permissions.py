@@ -19,7 +19,8 @@ class IsReservationOwnerOrAdmin(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         # Write permissions are only allowed to the account owner
-        if obj.reservation.owner == request.user:
+        if obj.reservation.owner == request.user or obj.reservation.table_number.location.owner == request.user \
+                or obj.reservation.service == request.user:
             return True
         return False
 

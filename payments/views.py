@@ -54,11 +54,12 @@ class AllRestaurantReservationsPaymentsView(ListAPIView):
 
     def get_queryset(self):
         restaurant_id = self.kwargs['restaurant_id']
-        payments = Payment.objects.filter(reservation__table_number__location=restaurant_id)
-        if self.request.user == payments.reservation.owner:
-            return payments
-        else:
-            raise PermissionDenied
+        restaurant_payments = Payment.objects.filter(reservation__table_number__location=restaurant_id)
+        return restaurant_payments
+        # if self.request.user == payments.reservation.owner:
+        #     return payments
+        # else:
+        #     raise PermissionDenied
 
 
 class AllUserReservationsPaymentsView(ListAPIView):
