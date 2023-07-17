@@ -66,7 +66,7 @@ class AllUserReservationsPaymentsView(ListAPIView):
     serializer_class = PaymentsDetailsSerializer
 
     def get_queryset(self):
-        return Payment.objects.filter(owner=self.request.user)
+        return Payment.objects.filter(reservation__owner=self.request.user)
 
 
 class CompletePaymentView(UpdateAPIView):
