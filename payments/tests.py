@@ -104,6 +104,11 @@ class PaymentSystemTests(APITestCase):
             amount=101
         )
 
+        cls.payment2 = Payment.objects.create(
+            reservation=cls.reservation2,
+            amount=99
+        )
+
     # path('create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment')
     def test_create_payment_view_status_code_if_authenticated(self):
         self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
@@ -327,96 +332,82 @@ class PaymentSystemTests(APITestCase):
         self.client.login(username='testuser2', password='TestSecret2!')
         response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_user_all_reservation_payments_view_status_code_if_not_authenticated(self):
-    #     response = self.client.post(reverse("user_all_payments", kwargs={"payment_id": self.restaurant_1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_user_all_reservation_payments_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testemployee2', password='TestEmployeeSecret2!')
-    #     response = self.client.post(reverse("user_all_payments", kwargs={"payment_id": self.restaurant_1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_user_all_reservation_payments_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.post(reverse("user_all_payments", kwargs={"payment_id": 20202020}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_user_all_reservation_payments_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/restaurant_all/{self.restaurant_id.id}/", format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_user_all_reservation_payments_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(reverse("user_all_payments", kwargs={"restaurant_id": self.restaurant_1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_user_all_reservation_payments_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("user_all_payments", kwargs={"restaurant_id": self.restaurant_1.id})
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_user_all_reservation_payments_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testemployee2', password='TestEmployeeSecret2!')
-    #     response = self.client.get(reverse("user_all_payments", kwargs={"restaurant_id": self.restaurant_1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_user_all_reservation_payments_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(reverse("user_all_payments", kwargs={"restaurant_id": 20202020}),
-    #                                 format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
+
+    def test_user_all_reservation_payments_view_status_code_if_not_authenticated(self):
+        response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # Permission need to be added
+    def test_user_all_reservation_payments_view_status_code_if_authenticated_and_not_authorized(self):
+        self.client.login(username='testemployee2', password='TestEmployeeSecret2!')
+        response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_all_reservation_payments_view_status_code_if_user_not_exists(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(reverse("user_all_payments", kwargs={"user_id": 44660088}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # Because of permission 403 comes before 404
+
+    def test_user_all_reservation_payments_view_returns_correct_instances_length(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
+        user_payments = Payment.objects.filter(reservation__owner__id=self.user2.id)
+        self.assertEqual(len(response.data), user_payments.count())
+
+    def test_user_all_payments_view_contains_correct_data(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
+        self.assertContains(response, self.payment1.amount)
+        self.assertContains(response, self.payment2.amount)
+        self.assertContains(response, self.payment1.reservation.id)
+        self.assertContains(response, self.payment2.reservation.id)
+        # self.assertContains(response, self.payment1.completed)
+
     # Part 4
-    # def test_tip_employee_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!e')
-    #     data = {
-    #         "amount": 90
-    #     }
-    #     response = self.client.post(f"/api/v1/payments/create/{self.reservation1.id}/", data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #
-    # def test_tip_employee_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": 90
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #
-    # def test_tip_employee_view_status_code_if_not_authenticated(self):
-    #     data = {
-    #         "amount": 90
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_tip_employee_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": 110
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
+    def test_tip_employee_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": 20
+        }
+        response = self.client.post(f"/api/v1/payments/tips/create/{self.reservation1.id}/", data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_tip_employee_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": 200
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_tip_employee_view_status_code_if_not_authenticated(self):
+        data = {
+            "amount": 2000
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_tip_employee_view_status_code_if_authenticated_and_not_authorized(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        data = {
+            "amount": 20000
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     # # status code need to be checked, should be 401 not 403
-    # def test_tip_employee_view_status_code_if_restaurant_not_exists(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": 90
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": 20202020}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
+    def test_tip_employee_view_status_code_if_reservation_not_exists(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        data = {
+            "amount": 20000
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": 77777}),
+                                    data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     # def test_tip_employee_view_status_code_if_amount_is_string(self):
     #     self.client.login(username='testuser1', password='TestSecret1!')
     #     data = {

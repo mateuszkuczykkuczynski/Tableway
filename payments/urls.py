@@ -11,8 +11,8 @@ urlpatterns = [
     path('restaurant_all/<int:restaurant_id>/', AllRestaurantReservationsPaymentsView.as_view(),
          name='restaurant_all_payments'),   # Tested
     path('user_all/<int:user_id>/', AllUserReservationsPaymentsView.as_view(),
-         name='user_all_payments'),     # To test
-    path('tips/<int:reservation_id>/', TipEmployeeView.as_view(),
+         name='user_all_payments'),     # Tested
+    path('tips/create/<int:reservation_id>/', TipEmployeeView.as_view(),
          name='tip_employee'),  # To test
     path('tips/user_all/<int:user_id>', AllUserTipsView.as_view(),
          name='user_all_tips'),     # To test

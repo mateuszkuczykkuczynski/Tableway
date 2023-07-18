@@ -11,7 +11,8 @@ from .serializers import (CreatePaymentForReservationSerializer, PaymentsDetails
                           TipEmployeeSerializer, AllUserTipsSerializer, AllEmployeeTipsSerializer,
                           AllRestaurantTipsSerializer)
 from .permissions import (IsReservationOwnerOrAdmin, IsRestaurantOwnerOrAdmin, IsTipsCreatorOrAdmin,
-                          IsRestaurantOwnerWithTipsOrAdmin, IsRestaurantEmployeeOrOwnerPermission)
+                          IsRestaurantOwnerWithTipsOrAdmin, IsRestaurantEmployeeOrOwnerPermission,
+                          IsReservationOwner, CanPerformTipCreation)
 
 
 class CreatePaymentView(CreateAPIView):
@@ -64,9 +65,11 @@ class AllRestaurantReservationsPaymentsView(ListAPIView):
 
 class AllUserReservationsPaymentsView(ListAPIView):
     serializer_class = PaymentsDetailsSerializer
+    permission_classes = (IsReservationOwner,)
 
     def get_queryset(self):
-        return Payment.objects.filter(reservation__owner=self.request.user)
+        user_id = self.kwargs['user_id']
+        return Payment.objects.filter(reservation__owner__id=user_id)
 
 
 class CompletePaymentView(UpdateAPIView):
@@ -83,7 +86,7 @@ class CompletePaymentView(UpdateAPIView):
 
 class TipEmployeeView(CreateAPIView):
     serializer_class = TipEmployeeSerializer
-    permission_classes = IsReservationOwnerOrAdmin
+    permission_classes = (CanPerformTipCreation,)
 
     def get_queryset(self):
         reservation_id = self.kwargs['reservation_id']
