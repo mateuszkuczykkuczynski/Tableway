@@ -2,10 +2,41 @@ from rest_framework import permissions, status
 from django.http import HttpResponse
 
 
-from bookings.models import Restaurant, Employee
-from .models import Tip
+from bookings.models import Restaurant, Employee, Reservation
+# from .models import Payment,
 
 # TODO: Refactor of file is needed because there is a lot of repeated class and functionality that should be reduced
+
+
+class CanPerformTipCreation(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+
+        reservation_id = view.kwargs.get('reservation_id')
+
+        is_reservation_owner = Reservation.objects.filter(id=reservation_id, owner=request.user).exists()
+        if is_reservation_owner:
+            return True
+
+        return False
+
+    # def has_object_permission(self, request, view, obj):
+    #     return request.user == obj.owner
+
+
+class IsReservationOwner(permissions.BasePermission):
+    """
+    Custom permission to only allow owners reservation to access data(including SAFE methods)
+    """
+
+    def has_permission(self, request, view):
+        user_id = view.kwargs['user_id']
+        return request.user.id == user_id
+
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.reservation.owner
 
 
 class IsReservationOwnerOrAdmin(permissions.BasePermission):
