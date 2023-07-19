@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth import get_user_model
+from rest_framework.exceptions import ValidationError
 
 from .models import Tip, Payment
 from bookings.models import Employee, Restaurant, Table, Reservation
@@ -108,6 +109,16 @@ class PaymentSystemTests(APITestCase):
             reservation=cls.reservation2,
             amount=99
         )
+
+        # cls.tip1 = Tip.objects.create(
+        #     reservation=cls.reservation1,
+        #     amount=22
+        # )
+        #
+        # cls.tip2 = Tip.objects.create(
+        #     reservation=cls.reservation2,
+        #     amount=44
+        # )
 
     # path('create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment')
     def test_create_payment_view_status_code_if_authenticated(self):
@@ -348,7 +359,7 @@ class PaymentSystemTests(APITestCase):
         response = self.client.get(reverse("user_all_payments", kwargs={"user_id": 44660088}))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # Because of permission 403 comes before 404
 
-    def test_user_all_reservation_payments_view_returns_correct_instances_length(self):
+    def test_user_all_reservation_payments_view_contains_correct_instances_length(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
         user_payments = Payment.objects.filter(reservation__owner__id=self.user2.id)
@@ -398,9 +409,8 @@ class PaymentSystemTests(APITestCase):
                                     data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # # status code need to be checked, should be 401 not 403
     def test_tip_employee_view_status_code_if_reservation_not_exists(self):
-        self.client.login(username='testuser1', password='TestSecret1!')
+        self.client.login(username='testuser2', password='TestSecret2!')
         data = {
             "amount": 20000
         }
@@ -408,86 +418,125 @@ class PaymentSystemTests(APITestCase):
                                     data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_tip_employee_view_status_code_if_amount_is_string(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": "Cyberpunk"
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #     self.assertEqual(response.data['amount'], ["A valid integer is required."])
+    def test_tip_employee_view_status_code_if_amount_is_string(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": "Cyberpunk"
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_tip_employee_view_response_if_amount_is_string(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": "Cyberpunk"
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.data['amount'], ["A valid integer is required."])
+
+    def test_tip_employee_view_status_code_if_amount_is_negative(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": -8008
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_tip_employee_view_response_if_amount_is_negative(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": -8008
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.data['amount'], ["Amount cannot be negative"])
+
+    def test_tip_employee_view_status_code_if_amount_is_longer_then_eight_digits(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": 700790094004
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_tip_employee_view_response_if_amount_is_longer_then_eight_digits(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": 700790094004
+        }
+        response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                    data=data, format="json")
+        self.assertEqual(response.data['amount'], ["Amount cannot be bigger than eight digits"])
+
+    def test_tip_employee_view_status_code_if_more_then_one_tip_per_reservation(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": 2020
+        }
+        response_1 = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                      data=data, format="json")
+        response_2 = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                      data=data, format="json")
+        self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response_2.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_tip_employee_view_response_if_more_then_one_tip_per_reservation(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        data = {
+            "amount": 202020
+        }
+        response_1 = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                      data=data, format="json")
+        response_2 = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
+                                      data=data, format="json")
+        error_messages = [error for error in response_2.data]
+        self.assertEqual(error_messages, ["A tip for this reservation already exists."])
+        # self.assertIn('A tip for this reservation already exists.', str(response_2.data)) # Second solution
+
+    # Part 4
+    def test_user_all_tips_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(f"/api/v1/payments/tips/user_all/{self.user2.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_all_tips_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_all_tips_view_status_code_if_not_authenticated(self):
+        response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_all_tips_view_status_code_if_user_not_exists(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(reverse("user_all_tips", kwargs={"user_id": 2244}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # Priority over 404
+
+    # Need to create tips on other reservation for tests purpose because of tips creations limitations
+    # def test_user_all_tips_view_contains_correct_instances_length(self):
+    #     self.client.login(username='testuser2', password='TestSecret2!')
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
+    #     user_tips = Tip.objects.filter(reservation__owner__id=self.user2.id)
+    #     self.assertEqual(len(response.data), user_tips.count())
     #
-    # def test_tip_employee_view_response_if_amount_is_string(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": "Cyberpunk"
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.data['amount'], ["A valid integer is required."])
-    #
-    # def test_tip_employee_view_status_code_if_amount_is_negative(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": -8008
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #
-    # def test_tip_employee_view_response_if_amount_is_negative(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": -8008
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.data['amount'], ["Amount cannot be negative"])
-    #
-    # def test_tip_employee_view_status_code_if_amount_is_longer_then_eight_digits(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": 700790094004
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #
-    # def test_tip_employee_view_response_if_amount_is_longer_then_eight_digits(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     data = {
-    #         "amount": 700790094004
-    #     }
-    #     response = self.client.post(reverse("tip_employee", kwargs={"reservation_id": self.reservation1.id}),
-    #                                 data=data, format="json")
-    #     self.assertEqual(response.data['amount'], ["Amount cannot be bigger than eight digits"])
-    #
-    # # In works part 4
-    # def test_user_all_tips_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/tips/user_all/{self.user1.id}/")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_user_all_tips_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_user_all_tips_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_user_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_user_all_tips_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": 20202020}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
+    # def test_user_all_tips_view_contains_correct_data(self):
+    #     self.client.login(username='testuser2', password='TestSecret2!')
+    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
+    #     self.assertContains(response, self.tip1.amount)
+    #     self.assertContains(response, self.tip1.reservation.id)
+    #     self.assertContains(response, self.tip2.amount)
+    #     self.assertContains(response, self.tip2.reservation.id)
+
     # def test_user_all_tips_view_status_code_if_authenticated(self):
     #     self.client.login(username='testuser1', password='TestSecret1!')
     #     response = self.client.get(f"/api/v1/payments/tips/user_all/{self.user1.id}/")
