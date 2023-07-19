@@ -1,5 +1,5 @@
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.http import Http404
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
@@ -100,18 +100,24 @@ class TipEmployeeView(CreateAPIView):
         except Reservation.DoesNotExist:
             raise Http404("Reservation not found.")
 
+        if Tip.objects.filter(reservation=reservation).exists():
+            raise ValidationError("A tip for this reservation already exists.")
         serializer.save(reservation=reservation)
 
 
 class AllUserTipsView(ListAPIView):
     serializer_class = AllUserTipsSerializer
-    permission_classes = IsTipsCreatorOrAdmin
+    permission_classes = (IsTipsCreatorOrAdmin,)
 
     def get_queryset(self):
-        queryset = Tip.objects.filter(reservation__owner=self.request.user)
-        if not queryset.exists():
-            raise PermissionDenied("You are not authorized to access this resource.")
+        user_id = self.kwargs['user_id']
+        queryset = Tip.objects.filter(reservation__owner_id=user_id)
         return queryset
+
+    # Second approach
+    # def get_queryset(self):
+    #    queryset = Tip.objects.filter(reservation__owner=self.request.user.id)
+    #     return queryset
 
 
 class AllEmployeeTipsView(ListAPIView):
