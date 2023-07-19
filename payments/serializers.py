@@ -39,6 +39,14 @@ class CompletePaymentSerializer(serializers.ModelSerializer):
 
 
 class TipEmployeeSerializer(serializers.ModelSerializer):
+    amount = serializers.IntegerField()
+
+    def validate_amount(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Amount cannot be negative")
+        if len(str(value)) > 8:
+            raise serializers.ValidationError("Amount cannot be bigger than eight digits")
+        return value
 
     class Meta:
         model = Tip

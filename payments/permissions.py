@@ -11,12 +11,13 @@ from bookings.models import Restaurant, Employee, Reservation
 class CanPerformTipCreation(permissions.BasePermission):
 
     def has_permission(self, request, view):
+
         if not request.user.is_authenticated:
             return False
 
         reservation_id = view.kwargs.get('reservation_id')
-
         is_reservation_owner = Reservation.objects.filter(id=reservation_id, owner=request.user).exists()
+
         if is_reservation_owner:
             return True
 
@@ -72,14 +73,18 @@ class IsTipsCreatorOrAdmin(permissions.BasePermission):
     Custom permission to only allow owners of an object and admins to edit or delete it.
     """
 
+    def has_permission(self, request, view):
+        # Check if the user_id in the URL matches the id of the currently authenticated user
+        return view.kwargs['user_id'] == request.user.id
+
     # def has_permission(self, request, view):
     #     user_id = view.kwargs['user_id']
     #
     #     # return request.user == Tip.objects.get(reservation__owner=user_id).reservation.owner
     #     return request.user.id == user_id
 
-    def has_object_permission(self, request, view, obj):
-        return obj.reservation.owner == request.user
+    # def has_object_permission(self, request, view, obj):
+    #     return obj.reservation.owner == request.user
 
 
 class IsTipsOwnerOrAdmin(permissions.BasePermission):
