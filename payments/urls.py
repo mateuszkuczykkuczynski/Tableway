@@ -13,8 +13,8 @@ urlpatterns = [
     path('user_all/<int:user_id>/', AllUserReservationsPaymentsView.as_view(),
          name='user_all_payments'),     # Tested
     path('tips/create/<int:reservation_id>/', TipEmployeeView.as_view(),
-         name='tip_employee'),  # To test
-    path('tips/user_all/<int:user_id>', AllUserTipsView.as_view(),
+         name='tip_employee'),  # Tested
+    path('tips/user_all/<int:user_id>/', AllUserTipsView.as_view(),
          name='user_all_tips'),     # To test
     path('tips/employee_all/<int:employee_id>', AllEmployeeTipsView.as_view(),
          name='employee_all_tips'),     # To test
