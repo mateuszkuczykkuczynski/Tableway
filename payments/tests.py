@@ -100,6 +100,20 @@ class PaymentSystemTests(APITestCase):
             owner=cls.user2,
         )
 
+        cls.reservation3 = Reservation.objects.create(
+            reserved_time="2023-06-15T18:48:41.193000Z",
+            reserved_time_end="2023-06-15T20:48:41.193000Z",
+            table_number=cls.table2,
+            owner=cls.user2,
+        )
+
+        cls.reservation4 = Reservation.objects.create(
+            reserved_time="2023-02-15T18:48:41.193000Z",
+            reserved_time_end="2023-02-15T20:48:41.193000Z",
+            table_number=cls.table2,
+            owner=cls.user2,
+        )
+
         cls.payment1 = Payment.objects.create(
             reservation=cls.reservation1,
             amount=101
@@ -110,15 +124,15 @@ class PaymentSystemTests(APITestCase):
             amount=99
         )
 
-        # cls.tip1 = Tip.objects.create(
-        #     reservation=cls.reservation1,
-        #     amount=22
-        # )
-        #
-        # cls.tip2 = Tip.objects.create(
-        #     reservation=cls.reservation2,
-        #     amount=44
-        # )
+        cls.tip1 = Tip.objects.create(
+            reservation=cls.reservation3,
+            amount=22
+        )
+
+        cls.tip2 = Tip.objects.create(
+            reservation=cls.reservation4,
+            amount=44
+        )
 
     # path('create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment')
     def test_create_payment_view_status_code_if_authenticated(self):
@@ -522,20 +536,27 @@ class PaymentSystemTests(APITestCase):
         response = self.client.get(reverse("user_all_tips", kwargs={"user_id": 2244}))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # Priority over 404
 
-    # Need to create tips on other reservation for tests purpose because of tips creations limitations
-    # def test_user_all_tips_view_contains_correct_instances_length(self):
-    #     self.client.login(username='testuser2', password='TestSecret2!')
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
-    #     user_tips = Tip.objects.filter(reservation__owner__id=self.user2.id)
-    #     self.assertEqual(len(response.data), user_tips.count())
-    #
-    # def test_user_all_tips_view_contains_correct_data(self):
-    #     self.client.login(username='testuser2', password='TestSecret2!')
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
-    #     self.assertContains(response, self.tip1.amount)
-    #     self.assertContains(response, self.tip1.reservation.id)
-    #     self.assertContains(response, self.tip2.amount)
-    #     self.assertContains(response, self.tip2.reservation.id)
+    # Need to create tips on other reservation for tests purpose because of tips creations limitations (done)
+    def test_user_all_tips_view_contains_correct_instances_length(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
+        user_tips = Tip.objects.filter(reservation__owner__id=self.user2.id)
+        self.assertEqual(len(response.data), user_tips.count())
+
+    def test_user_all_tips_view_contains_correct_data(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user2.id}))
+        self.assertContains(response, self.tip1.amount)
+        self.assertContains(response, self.tip1.reservation.id)
+        self.assertContains(response, self.tip1.date)
+        # self.assertContains(response, self.tip1.employee)
+        # self.assertContains(response, self.tip1.received)
+        self.assertContains(response, self.tip2.amount)
+        self.assertContains(response, self.tip2.reservation.id)
+        self.assertContains(response, self.tip2.date)
+        # self.assertContains(response, self.tip2.employee)
+        # self.assertContains(response, self.tip2.received)
+
 
     # def test_user_all_tips_view_status_code_if_authenticated(self):
     #     self.client.login(username='testuser1', password='TestSecret1!')
