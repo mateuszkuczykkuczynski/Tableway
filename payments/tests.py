@@ -98,6 +98,7 @@ class PaymentSystemTests(APITestCase):
             reserved_time_end="2023-11-15T20:48:41.193000Z",
             table_number=cls.table2,
             owner=cls.user2,
+            service=cls.employee1,
         )
 
         cls.reservation3 = Reservation.objects.create(
@@ -105,6 +106,8 @@ class PaymentSystemTests(APITestCase):
             reserved_time_end="2023-06-15T20:48:41.193000Z",
             table_number=cls.table2,
             owner=cls.user2,
+            service=cls.employee1,
+
         )
 
         cls.reservation4 = Reservation.objects.create(
@@ -112,6 +115,24 @@ class PaymentSystemTests(APITestCase):
             reserved_time_end="2023-02-15T20:48:41.193000Z",
             table_number=cls.table2,
             owner=cls.user2,
+            service=cls.employee1,
+        )
+
+        cls.reservation5 = Reservation.objects.create(
+            reserved_time="2023-12-15T18:48:41.193000Z",
+            reserved_time_end="2023-12-15T20:48:41.193000Z",
+            table_number=cls.table2,
+            owner=cls.user2,
+            service=cls.employee1,
+
+        )
+
+        cls.reservation6 = Reservation.objects.create(
+            reserved_time="2023-01-15T18:48:41.193000Z",
+            reserved_time_end="2023-01-15T20:48:41.193000Z",
+            table_number=cls.table2,
+            owner=cls.user2,
+            service=cls.employee1,
         )
 
         cls.payment1 = Payment.objects.create(
@@ -134,7 +155,19 @@ class PaymentSystemTests(APITestCase):
             amount=44
         )
 
-    # path('create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment')
+        cls.tip3 = Tip.objects.create(
+            reservation=cls.reservation5,
+            amount=22,
+            employee=cls.employee1,
+        )
+
+        cls.tip4 = Tip.objects.create(
+            reservation=cls.reservation6,
+            amount=44,
+            employee=cls.employee1,
+        )
+
+    # Part 1 (create_payment)
     def test_create_payment_view_status_code_if_authenticated(self):
         self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
         data = {
@@ -174,7 +207,6 @@ class PaymentSystemTests(APITestCase):
         # self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # status code need to be checked, should be 401 not 403
     def test_create_payment_view_status_code_if_restaurant_not_exists(self):
         self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
         data = {
@@ -184,7 +216,7 @@ class PaymentSystemTests(APITestCase):
         response = self.client.post(reverse("create_payment", kwargs={"restaurant_id": 20202020}),
                                     data=data, format="json")
         # self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # 403 priority over 401
 
     def test_create_payment_view_status_code_if_amount_is_string(self):
         self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
@@ -247,7 +279,7 @@ class PaymentSystemTests(APITestCase):
                                     data=data, format="json")
         self.assertEqual(response.data['amount'], ["Amount cannot be bigger than eight digits"])
 
-    # In works
+    # Part 2 (complete_payment)
     def test_complete_payment_view_status_code_if_authenticated(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         data = {
@@ -308,7 +340,7 @@ class PaymentSystemTests(APITestCase):
                                    data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    # Part 2
+    # Part 3 (restaurant_all_payments)
     def test_restaurant_all_payments_view_status_code_if_authenticated(self):
         self.client.login(username='testuser1', password='TestSecret1!')
         response = self.client.get(f"/api/v1/payments/restaurant_all/{self.restaurant_1.id}/", format="json")
@@ -340,40 +372,38 @@ class PaymentSystemTests(APITestCase):
         self.assertContains(response, self.payment1.reservation.id)
         # self.assertContains(response, self.payment1.completed)
 
-    # Refactored -> ready to commit
     def test_restaurant_all_payments_view_contains_correct_instances_length(self):
         self.client.login(username='testuser1', password='TestSecret1!')
         response = self.client.get(reverse("restaurant_all_payments", kwargs={"restaurant_id": self.restaurant_1.id}))
         restaurant_payments = Payment.objects.filter(reservation__table_number__location=self.restaurant_1)
         self.assertEqual(len(response.data), restaurant_payments.count())
 
-    # Part 3
-    def test_user_all_reservation_payments_view_status_code_if_authenticated(self):
+    # Part 4 (user_all_payments)
+    def test_user_all_payments_view_status_code_if_authenticated(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         response = self.client.get(f"/api/v1/payments/user_all/{self.user2.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_user_all_reservation_payments_view_status_code_if_authenticated_by_name(self):
+    def test_user_all_payments_view_status_code_if_authenticated_by_name(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_user_all_reservation_payments_view_status_code_if_not_authenticated(self):
+    def test_user_all_payments_view_status_code_if_not_authenticated(self):
         response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # Permission need to be added
-    def test_user_all_reservation_payments_view_status_code_if_authenticated_and_not_authorized(self):
+    def test_user_all_payments_view_status_code_if_authenticated_and_not_authorized(self):
         self.client.login(username='testemployee2', password='TestEmployeeSecret2!')
         response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_user_all_reservation_payments_view_status_code_if_user_not_exists(self):
+    def test_user_all_payments_view_status_code_if_user_not_exists(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         response = self.client.get(reverse("user_all_payments", kwargs={"user_id": 44660088}))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # Because of permission 403 comes before 404
 
-    def test_user_all_reservation_payments_view_contains_correct_instances_length(self):
+    def test_user_all_payments_view_contains_correct_instances_length(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         response = self.client.get(reverse("user_all_payments", kwargs={"user_id": self.user2.id}))
         user_payments = Payment.objects.filter(reservation__owner__id=self.user2.id)
@@ -388,7 +418,7 @@ class PaymentSystemTests(APITestCase):
         self.assertContains(response, self.payment2.reservation.id)
         # self.assertContains(response, self.payment1.completed)
 
-    # Part 4
+    # Part 5 (tip_employee)
     def test_tip_employee_view_status_code_if_authenticated(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         data = {
@@ -511,7 +541,7 @@ class PaymentSystemTests(APITestCase):
         self.assertEqual(error_messages, ["A tip for this reservation already exists."])
         # self.assertIn('A tip for this reservation already exists.', str(response_2.data)) # Second solution
 
-    # Part 4
+    # Part 6 (user_all_tips)
     def test_user_all_tips_view_status_code_if_authenticated(self):
         self.client.login(username='testuser2', password='TestSecret2!')
         response = self.client.get(f"/api/v1/payments/tips/user_all/{self.user2.id}/")
@@ -557,129 +587,109 @@ class PaymentSystemTests(APITestCase):
         # self.assertContains(response, self.tip2.employee)
         # self.assertContains(response, self.tip2.received)
 
+    # In works part 7 path('tips/employee_all/<int:employee_id>', AllEmployeeTipsView.as_view(),
+    #          name='employee_all_tips'),
+    def test_employee_all_tips_view_status_code_if_authenticated(self):
+        self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
+        response = self.client.get(f"/api/v1/payments/tips/employee_all/{self.employee1.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # def test_user_all_tips_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/tips/user_all/{self.user1.id}/")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_user_all_tips_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_user_all_tips_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_user_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": self.user1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_user_all_tips_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("user_all_tips", kwargs={"user_id": 20202020}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # In works part 5
-    # def test_employee_all_tips_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/tips/employee_all/{self.employee1.id}/")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_employee_all_tips_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_employee_all_tips_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_employee_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_employee_all_tips_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": 20202020}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_employee_all_tips_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/tips/employee_all/{self.employee1.id}/")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_employee_all_tips_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_employee_all_tips_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_employee_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_employee_all_tips_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
-    #     response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": 20202020}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    # # In works part 6
-    # def test_restaurant_all_tips_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/tips/restaurant_all/{self.restaurant_1.id}/")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": 20202020}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/tips/employee_all/{self.restaurant_1.id}/")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_restaurant_all_tips_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": 20202020}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # # In works part 7
+    def test_employee_all_tips_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
+        response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_employee_all_tips_view_status_code_if_not_authenticated(self):
+        response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # Add permission (done)
+    def test_employee_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
+        self.client.login(username='testemployee2', password='TestEmployeeSecret2!')
+        response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_employee_all_tips_view_status_code_if_authenticated_and_restaurant_owner(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_employee_all_tips_view_status_code_if_employee_not_exists(self):
+        self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
+        response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": 3553}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_employee_all_tips_view_contains_correct_instances_length(self):
+        self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
+        response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
+        employee_tips = Tip.objects.filter(employee=self.employee1)
+        self.assertEqual(len(response.data), employee_tips.count())
+
+    # Employee do not receive tips based on reservation, -> bugfix for later
+    def test_employee_all_tips_view_contains_correct_data(self):
+        self.client.login(username='testemployee1', password='TestEmployeeSecret1!')
+        response = self.client.get(reverse("employee_all_tips", kwargs={"employee_id": self.employee1.id}))
+        self.assertContains(response, self.tip3.amount)
+        self.assertContains(response, self.tip3.reservation.id)
+        self.assertContains(response, self.tip3.date)
+        # self.assertContains(response, self.tip3.received)
+        self.assertContains(response, self.tip4.amount)
+        self.assertContains(response, self.tip4.reservation.id)
+        self.assertContains(response, self.tip4.date)
+        # self.assertContains(response, self.tip4.received)
+
+    # # In works part 8
+    def test_restaurant_all_tips_view_status_code_if_authenticated(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        response = self.client.get(f"/api/v1/payments/tips/restaurant_all/{self.restaurant_1.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_restaurant_all_tips_view_status_code_if_authenticated_by_name(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_restaurant_all_tips_view_status_code_if_not_authenticated(self):
+        response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_restaurant_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
+        self.client.login(username='testuser2', password='TestSecret2!')
+        response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_restaurant_all_tips_view_status_code_if_restaurant_not_exists(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": 500005}))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_restaurant_all_tips_view_contains_correct_instances_length(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
+        restaurant_tips = Tip.objects.filter(reservation__table_number__location=self.restaurant_1)
+        self.assertEqual(len(response.data), restaurant_tips.count())
+
+    def test_restaurant_all_tips_view_contains_correct_data(self):
+        self.client.login(username='testuser1', password='TestSecret1!')
+        response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
+        self.assertContains(response, self.tip1.amount)
+        self.assertContains(response, self.tip1.reservation.id)
+        self.assertContains(response, self.tip1.date)
+        # self.assertContains(response, self.tip3.received)
+        self.assertContains(response, self.tip2.amount)
+        self.assertContains(response, self.tip2.reservation.id)
+        self.assertContains(response, self.tip2.date)
+        # self.assertContains(response, self.tip4.received)
+        self.assertContains(response, self.tip3.amount)
+        self.assertContains(response, self.tip3.reservation.id)
+        self.assertContains(response, self.tip3.date)
+        # self.assertContains(response, self.tip3.received)
+        self.assertContains(response, self.tip4.amount)
+        self.assertContains(response, self.tip4.reservation.id)
+        self.assertContains(response, self.tip4.date)
+        # self.assertContains(response, self.tip4.received)
+
+    # # In works part 9
     # def test_restaurant_employees_all_tips_view_status_code_if_authenticated(self):
     #     self.client.login(username='testuser1', password='TestSecret1!')
     #     response = self.client.get(f"/api/v1/payments/tips/restaurant_all/{self.restaurant_1.id}/")
