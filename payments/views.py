@@ -12,7 +12,7 @@ from .serializers import (CreatePaymentForReservationSerializer, PaymentsDetails
                           AllRestaurantTipsSerializer)
 from .permissions import (IsReservationOwnerOrAdmin, IsRestaurantOwnerOrAdmin, IsTipsCreatorOrAdmin,
                           IsRestaurantOwnerWithTipsOrAdmin, IsRestaurantEmployeeOrOwnerPermission,
-                          IsReservationOwner, CanPerformTipCreation)
+                          IsReservationOwner, CanPerformTipCreation, IsTipsOwnerOrAdmin)
 
 
 class CreatePaymentView(CreateAPIView):
@@ -122,25 +122,27 @@ class AllUserTipsView(ListAPIView):
 
 class AllEmployeeTipsView(ListAPIView):
     serializer_class = AllEmployeeTipsSerializer
+    permission_classes = (IsTipsOwnerOrAdmin,)
 
     def get_queryset(self):
-        queryset = Tip.objects.filter(employee=self.request.user)
+        employee_id = self.kwargs['employee_id']
+        queryset = Tip.objects.filter(employee=employee_id)
         return queryset
 
 
 class AllRestaurantTipsView(ListAPIView):
     serializer_class = AllRestaurantTipsSerializer
-    permission_classes = IsRestaurantOwnerWithTipsOrAdmin
+    permission_classes = (IsRestaurantOwnerOrAdmin,)
 
     def get_queryset(self):
-        restaurant_id = self.kwargs['payment_id']
+        restaurant_id = self.kwargs['restaurant_id']
         queryset = Tip.objects.filter(reservation__table_number__location=restaurant_id)
         return queryset
 
 
-class AllEmployeeTipsRestaurantOwnerView(ListAPIView):
-    serializer_class = AllEmployeeTipsSerializer
-
-    def get_queryset(self):
-        queryset = Tip.objects.filter(employee=self.request.user)
-        return queryset
+# class AllEmployeeTipsRestaurantOwnerView(ListAPIView):
+#     serializer_class = AllEmployeeTipsSerializer
+#
+#     def get_queryset(self):
+#         queryset = Tip.objects.filter(employee=self.request.user)
+#         return queryset
