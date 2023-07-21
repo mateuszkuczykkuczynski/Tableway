@@ -65,7 +65,10 @@ class IsRestaurantOwnerOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         restaurant_id = view.kwargs['restaurant_id']
 
-        return request.user == Restaurant.objects.get(id=restaurant_id).owner
+        try:
+            return request.user.id == Restaurant.objects.get(id=restaurant_id).owner.id
+        except Restaurant.DoesNotExist:
+            return False
 
 
 class IsTipsCreatorOrAdmin(permissions.BasePermission):
@@ -92,14 +95,11 @@ class IsTipsOwnerOrAdmin(permissions.BasePermission):
     Custom permission to only allow owners of an object and admins to edit or delete it.
     """
 
-    # def has_permission(self, request, view):
-    #     user_id = view.kwargs['user_id']
-    #
-    #     # return request.user == Tip.objects.get(reservation__owner=user_id).reservation.owner
-    #     return request.user.id == user_id
-
-    def has_object_permission(self, request, view, obj):
-        return obj.reservation.owner == request.user
+    def has_permission(self, request, view):
+        employee_id = view.kwargs['employee_id']
+        is_owner = Restaurant.objects.filter(restaurant_employees__id=employee_id, owner=request.user.id).exists()
+        # Check if the user_id in the URL matches the id of the currently authenticated user
+        return view.kwargs['employee_id'] == request.user.id or is_owner
 
 
 class IsRestaurantOwnerWithTipsOrAdmin(permissions.BasePermission):
