@@ -1,23 +1,22 @@
-from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
-from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.http import Http404
+from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
-from rest_framework import status
+
 
 from bookings.models import Reservation
 from .models import Payment, Tip
 from .serializers import (CreatePaymentForReservationSerializer, PaymentsDetailsSerializer, CompletePaymentSerializer,
                           TipEmployeeSerializer, AllUserTipsSerializer, AllEmployeeTipsSerializer,
                           AllRestaurantTipsSerializer)
-from .permissions import (IsReservationOwnerOrAdmin, IsRestaurantOwnerOrAdmin, IsTipsCreatorOrAdmin,
-                          IsRestaurantOwnerWithTipsOrAdmin, IsRestaurantEmployeeOrOwnerPermission,
-                          IsReservationOwner, CanPerformTipCreation, IsTipsOwnerOrAdmin)
+from .permissions import (IsRestaurantEmployeeOrOwnerOrAdmin, IsReservationOwnerOrAdmin, IsRestaurantOwnerOrAdmin,
+                          IsTipsCreatorOrAdmin, IsReservationOwner,
+                          CanPerformTipCreation, IsTipsOwnerOrAdmin)
 
 
 class CreatePaymentView(CreateAPIView):
     serializer_class = CreatePaymentForReservationSerializer
-    permission_classes = (IsRestaurantEmployeeOrOwnerPermission,)
+    permission_classes = (IsRestaurantEmployeeOrOwnerOrAdmin,)
 
     def get_queryset(self):
         reservations = Reservation.objects.filter(
@@ -39,14 +38,14 @@ class CreatePaymentView(CreateAPIView):
         context['reservations'] = self.get_queryset()
         return context
 
-    # def create(self, request, *args, **kwargs):
-    #     try:
-    #         return super().create(request, *args, **kwargs)
-    #     except NotFound:
-    #         return Response(status=status.HTTP_404_NOT_FOUND)
 
-        # if not user.is_employee or not user.employee.restaurant_id == restaurant_id:
-        #     raise PermissionDenied("You are not authorized to create a payment for this reservation")
+class CompletePaymentView(UpdateAPIView):
+    serializer_class = CompletePaymentSerializer
+    permission_classes = (IsReservationOwnerOrAdmin,)
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return Payment.objects.all()
 
 
 class AllRestaurantReservationsPaymentsView(ListAPIView):
@@ -57,10 +56,6 @@ class AllRestaurantReservationsPaymentsView(ListAPIView):
         restaurant_id = self.kwargs['restaurant_id']
         restaurant_payments = Payment.objects.filter(reservation__table_number__location=restaurant_id)
         return restaurant_payments
-        # if self.request.user == payments.reservation.owner:
-        #     return payments
-        # else:
-        #     raise PermissionDenied
 
 
 class AllUserReservationsPaymentsView(ListAPIView):
@@ -70,18 +65,6 @@ class AllUserReservationsPaymentsView(ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         return Payment.objects.filter(reservation__owner__id=user_id)
-
-
-class CompletePaymentView(UpdateAPIView):
-    serializer_class = CompletePaymentSerializer
-    permission_classes = (IsReservationOwnerOrAdmin,)
-    lookup_field = 'id'
-
-    # def get_queryset(self):
-    #     payment_id = self.kwargs['payment_id']
-    #     return Payment.objects.get(id=payment_id)
-    def get_queryset(self):
-        return Payment.objects.all()
 
 
 class TipEmployeeView(CreateAPIView):
