@@ -1,12 +1,10 @@
-from rest_framework.test import APITestCase
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
-from django.contrib.auth import get_user_model
-from rest_framework.exceptions import ValidationError
+from rest_framework.test import APITestCase
 
 from .models import Tip, Payment
 from bookings.models import Employee, Restaurant, Table, Reservation
-from accounts.models import CustomUser
 
 
 class PaymentSystemTests(APITestCase):
@@ -688,54 +686,3 @@ class PaymentSystemTests(APITestCase):
         self.assertContains(response, self.tip4.reservation.id)
         self.assertContains(response, self.tip4.date)
         # self.assertContains(response, self.tip4.received)
-
-    # # In works part 9
-    # def test_restaurant_employees_all_tips_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/tips/restaurant_all/{self.restaurant_1.id}/")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": 20202020}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_authenticated(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(f"/api/v1/payments/tips/employee_all/{self.restaurant_1.id}/")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_authenticated_by_name(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_not_authenticated(self):
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_authenticated_and_not_authorized(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": self.restaurant_1.id}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_restaurant_employees_all_tips_view_status_code_if_payment_not_exists(self):
-    #     self.client.login(username='testuser1', password='TestSecret1!')
-    #     response = self.client.get(reverse("restaurant_all_tips", kwargs={"restaurant_id": 20202020}))
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    # In works part 8 (TODO: additional tests in work)
