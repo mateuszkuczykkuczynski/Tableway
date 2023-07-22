@@ -1,9 +1,12 @@
 from django.urls import path
 
-from .views import (CreatePaymentView, AllRestaurantReservationsPaymentsView,AllUserReservationsPaymentsView,
-                    CompletePaymentView, TipEmployeeView, AllUserTipsView, AllEmployeeTipsView, AllRestaurantTipsView)
+from .views import (CreatePaymentView, AllRestaurantReservationsPaymentsView,
+                    AllUserReservationsPaymentsView, CompletePaymentView,
+                    TipEmployeeView, AllUserTipsView,
+                    AllEmployeeTipsView, AllRestaurantTipsView)
 
-# TODO check if works fine
+# TODO Couple of fixes left
+
 urlpatterns = [
     path('create/<int:restaurant_id>/', CreatePaymentView.as_view(), name='create_payment'),   # Tested (few fixes left)
     path('complete/<int:id>/', CompletePaymentView.as_view(), name='complete_payment'),    # Tested (one fix left)
@@ -19,6 +22,4 @@ urlpatterns = [
          name='employee_all_tips'),     # Tested (one bugfix left)
     path('tips/restaurant_all/<int:restaurant_id>/', AllRestaurantTipsView.as_view(),
          name='restaurant_all_tips'),   # Tested
-    # path('tips/restaurant_employees/<int:employee_id>', AllEmployeeTipsRestaurantOwnerView.as_view(),
-    #      name='restaurant_employees_all_tips'),     # To test
 ]

@@ -13,14 +13,14 @@ class Payment(models.Model):
     def generate_secret(self):
         self.secret = str(random.randint(10000, 999999))
 
-    # def update_payment_status(self):
-    #     if self.amount:
-    #         self.completed = True
-
     def update_reservation_paid_status(self):
         if self.completed and self.reservation:
             self.reservation.paid = True
             self.reservation.save()
+
+    # def update_payment_status(self):
+    #     if self.amount:
+    #         self.completed = True
 
     def save(self, *args, **kwargs):
         if not self.pk:
