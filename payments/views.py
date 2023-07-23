@@ -4,13 +4,14 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import NotFound
 
 
+
 from bookings.models import Reservation
 from .models import Payment, Tip
 from .serializers import (CreatePaymentForReservationSerializer, PaymentsDetailsSerializer, CompletePaymentSerializer,
                           TipEmployeeSerializer, AllUserTipsSerializer, AllEmployeeTipsSerializer,
                           AllRestaurantTipsSerializer)
-from .permissions import (IsRestaurantEmployeeOrOwnerOrAdmin, IsReservationOwnerOrAdmin, IsRestaurantOwnerOrAdmin,
-                          IsTipsCreatorOrAdmin, IsReservationOwner,
+from .permissions import (IsRestaurantEmployeeOrOwnerOrAdmin, IsOwnerOrAdminOfPayment, IsRestaurantOwnerOrAdmin,
+                          IsTipsCreatorOrAdmin, IsOwnerOrAdminOfUserReservations,
                           CanPerformTipCreation, IsTipsOwnerOrAdmin)
 
 
@@ -41,11 +42,20 @@ class CreatePaymentView(CreateAPIView):
 
 class CompletePaymentView(UpdateAPIView):
     serializer_class = CompletePaymentSerializer
-    permission_classes = (IsReservationOwnerOrAdmin,)
+    permission_classes = (IsOwnerOrAdminOfPayment,)
     lookup_field = 'id'
 
     def get_queryset(self):
         return Payment.objects.all()
+
+
+class AllUserReservationsPaymentsView(ListAPIView):
+    serializer_class = PaymentsDetailsSerializer
+    permission_classes = (IsOwnerOrAdminOfUserReservations,)
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        return Payment.objects.filter(reservation__owner__id=user_id)
 
 
 class AllRestaurantReservationsPaymentsView(ListAPIView):
@@ -56,15 +66,6 @@ class AllRestaurantReservationsPaymentsView(ListAPIView):
         restaurant_id = self.kwargs['restaurant_id']
         restaurant_payments = Payment.objects.filter(reservation__table_number__location=restaurant_id)
         return restaurant_payments
-
-
-class AllUserReservationsPaymentsView(ListAPIView):
-    serializer_class = PaymentsDetailsSerializer
-    permission_classes = (IsReservationOwner,)
-
-    def get_queryset(self):
-        user_id = self.kwargs['user_id']
-        return Payment.objects.filter(reservation__owner__id=user_id)
 
 
 class TipEmployeeView(CreateAPIView):

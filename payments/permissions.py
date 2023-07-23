@@ -3,13 +3,28 @@ from django.http import HttpResponse
 
 
 from bookings.models import Restaurant, Employee, Reservation
-# from .models import Payment,
+from .models import Payment
 
 # TODO: Refactor of file is needed because there is a lot of repeated class and functionality that should be reduced
 
 
-class IsRestaurantEmployeeOrOwnerOrAdmin(permissions.BasePermission):
+class IsSuperUser(permissions.BasePermission):
+    """
+    Base permission class to check if the user is a superuser.
+    """
+
     def has_permission(self, request, view):
+        return request.user.is_superuser
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_superuser
+
+
+class IsRestaurantEmployeeOrOwnerOrAdmin(IsSuperUser):
+    def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return True
+
         if not request.user.is_authenticated:
             return False
 
@@ -18,34 +33,73 @@ class IsRestaurantEmployeeOrOwnerOrAdmin(permissions.BasePermission):
         is_owner = Restaurant.objects.filter(id=restaurant_id, owner=request.user).exists()
         is_employee = Employee.objects.filter(works_in_id=restaurant_id, id=request.user.id).exists()
 
-        if is_owner or is_employee or request.user.is_superuser:
+        if is_owner or is_employee:
             return True
         return False
 
 
-class IsReservationOwnerOrAdmin(permissions.BasePermission):
-    """
-    Custom permission to only allow owners of an object and admins to edit or delete it.
-    """
-
-    def has_object_permission(self, request, view, obj):
-
-        # allow GET, HEAD, or OPTIONS requests
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        # Write permissions are only allowed to the account owner
-        if obj.reservation.owner == request.user or obj.reservation.table_number.location.owner == request.user \
-                or obj.reservation.service == request.user or request.user.is_superuser:
-            return True
-        return False
-
-
-class IsRestaurantOwnerOrAdmin(permissions.BasePermission):
+class IsOwnerOrAdminOfPayment(IsSuperUser):
     """
     Custom permission to only allow owners of an object and admins to edit or delete it.
     """
 
     def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return True
+
+        payment_id = view.kwargs.get('id')
+        try:
+            payment = Payment.objects.get(id=payment_id)
+        except Payment.DoesNotExist:
+            return False
+
+        valid_ids = [
+            payment.reservation.owner.id,
+            payment.reservation.table_number.location.owner.id,
+            payment.reservation.service.id,
+        ]
+
+        return request.user.id in valid_ids
+
+    def has_object_permission(self, request, view, obj):
+        if super().has_object_permission(request, view, obj):
+            return True
+
+        # Write permissions are only allowed to the account owner
+        if obj.reservation.owner == request.user or obj.reservation.table_number.location.owner == request.user \
+                or obj.reservation.service == request.user:
+            return True
+        return False
+
+
+class IsOwnerOrAdminOfUserReservations(IsSuperUser):
+    """
+    Custom permission to only allow owners reservation to access data(including SAFE methods)
+    """
+
+    def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return True
+
+        user_id = view.kwargs['user_id']
+        return request.user.id == user_id
+
+    def has_object_permission(self, request, view, obj):
+        if super().has_object_permission(request, view, obj):
+            return True
+
+        return request.user == obj.reservation.owner
+
+
+class IsRestaurantOwnerOrAdmin(IsSuperUser):
+    """
+    Custom permission to only allow owners of an object and admins to edit or delete it.
+    """
+
+    def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return True
+
         restaurant_id = view.kwargs['restaurant_id']
 
         try:
@@ -54,9 +108,11 @@ class IsRestaurantOwnerOrAdmin(permissions.BasePermission):
             return False
 
 
-class CanPerformTipCreation(permissions.BasePermission):
+class CanPerformTipCreation(IsSuperUser):
 
     def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return True
 
         if not request.user.is_authenticated:
             return False
@@ -73,26 +129,15 @@ class CanPerformTipCreation(permissions.BasePermission):
     #     return request.user == obj.owner
 
 
-class IsReservationOwner(permissions.BasePermission):
-    """
-    Custom permission to only allow owners reservation to access data(including SAFE methods)
-    """
-
-    def has_permission(self, request, view):
-        user_id = view.kwargs['user_id']
-        return request.user.id == user_id
-
-    def has_object_permission(self, request, view, obj):
-        return request.user == obj.reservation.owner
-
-
-
-class IsTipsCreatorOrAdmin(permissions.BasePermission):
+class IsTipsCreatorOrAdmin(IsSuperUser):
     """
     Custom permission to only allow owners of an object and admins to edit or delete it.
     """
 
     def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return True
+
         # Check if the user_id in the URL matches the id of the currently authenticated user
         return view.kwargs['user_id'] == request.user.id
 
@@ -106,12 +151,15 @@ class IsTipsCreatorOrAdmin(permissions.BasePermission):
     #     return obj.reservation.owner == request.user
 
 
-class IsTipsOwnerOrAdmin(permissions.BasePermission):
+class IsTipsOwnerOrAdmin(IsSuperUser):
     """
     Custom permission to only allow owners of an object and admins to edit or delete it.
     """
 
     def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return True
+
         employee_id = view.kwargs['employee_id']
         try:
             is_owner = Restaurant.objects.filter(id=Employee.objects.get(id=employee_id).works_in.id,
@@ -122,7 +170,7 @@ class IsTipsOwnerOrAdmin(permissions.BasePermission):
             return False
 
 
-class IsRestaurantOwnerWithTipsOrAdmin(permissions.BasePermission):
+class IsRestaurantOwnerWithTipsOrAdmin(IsSuperUser):
     """
     Custom permission to only allow owners of an object and admins to edit or delete it.
     """
@@ -134,4 +182,7 @@ class IsRestaurantOwnerWithTipsOrAdmin(permissions.BasePermission):
     #     return request.user.id == user_id
 
     def has_object_permission(self, request, view, obj):
+        if super().has_object_permission(request, view, obj):
+            return True
+
         return obj.reservation.table_number.location.owner == request.user
