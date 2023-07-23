@@ -336,7 +336,7 @@ class PaymentSystemTests(APITestCase):
         }
         response = self.client.put(reverse("complete_payment", kwargs={"id": 50055005}),
                                    data=data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # 403 priority over 404 (for safety purpose)
 
     # Part 3 (restaurant_all_payments)
     def test_restaurant_all_payments_view_status_code_if_authenticated(self):
