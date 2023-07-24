@@ -4,7 +4,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.exceptions import NotFound
 
 
-
 from bookings.models import Reservation
 from .models import Payment, Tip
 from .serializers import (CreatePaymentForReservationSerializer, PaymentsDetailsSerializer, CompletePaymentSerializer,
@@ -49,15 +48,6 @@ class CompletePaymentView(UpdateAPIView):
         return Payment.objects.all()
 
 
-class AllUserReservationsPaymentsView(ListAPIView):
-    serializer_class = PaymentsDetailsSerializer
-    permission_classes = (IsOwnerOrAdminOfUserReservations,)
-
-    def get_queryset(self):
-        user_id = self.kwargs['user_id']
-        return Payment.objects.filter(reservation__owner__id=user_id)
-
-
 class AllRestaurantReservationsPaymentsView(ListAPIView):
     serializer_class = PaymentsDetailsSerializer
     permission_classes = (IsRestaurantOwnerOrAdmin,)
@@ -66,6 +56,15 @@ class AllRestaurantReservationsPaymentsView(ListAPIView):
         restaurant_id = self.kwargs['restaurant_id']
         restaurant_payments = Payment.objects.filter(reservation__table_number__location=restaurant_id)
         return restaurant_payments
+
+
+class AllUserReservationsPaymentsView(ListAPIView):
+    serializer_class = PaymentsDetailsSerializer
+    permission_classes = (IsOwnerOrAdminOfUserReservations,)
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        return Payment.objects.filter(reservation__owner__id=user_id)
 
 
 class TipEmployeeView(CreateAPIView):
@@ -123,10 +122,3 @@ class AllRestaurantTipsView(ListAPIView):
         queryset = Tip.objects.filter(reservation__table_number__location=restaurant_id)
         return queryset
 
-
-# class AllEmployeeTipsRestaurantOwnerView(ListAPIView):
-#     serializer_class = AllEmployeeTipsSerializer
-#
-#     def get_queryset(self):
-#         queryset = Tip.objects.filter(employee=self.request.user)
-#         return queryset
