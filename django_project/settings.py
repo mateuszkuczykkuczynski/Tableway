@@ -191,5 +191,7 @@ SPECTACULAR_SETTINGS = {
 
 }
 
+CELERY_BROKER_URL = 'amqp://localhost'
+
 # ACCOUNT_ADAPTER = 'accounts.adapter.CustomAccountAdapter'
 # ACCOUNT_USERNAME_REQUIRED = False
