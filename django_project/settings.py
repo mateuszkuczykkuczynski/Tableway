@@ -191,7 +191,7 @@ SPECTACULAR_SETTINGS = {
 
 }
 
-CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_BROKER_URL = 'redis://localhost:6379'
 
 # ACCOUNT_ADAPTER = 'accounts.adapter.CustomAccountAdapter'
 # ACCOUNT_USERNAME_REQUIRED = False
