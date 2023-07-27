@@ -4,6 +4,7 @@ from rest_framework import serializers
 from cities_light.models import Country, City
 
 from bookings.models import Restaurant, Table
+from .tasks import send_feedback_email_task
 
 User = get_user_model()
 
@@ -76,6 +77,9 @@ class CustomRegistration(RegisterSerializer):
         user.name = name
         user.surname = surname
         user.save()
+
+        test_mail = "misk0005@wp.pl"
+        send_feedback_email_task.delay(test_mail, name)
 
     def validate(self, data):
         is_restaurant = data.get("is_restaurant", False)
