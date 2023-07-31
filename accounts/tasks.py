@@ -1,7 +1,13 @@
-from django_project import celery_app
 from time import sleep
 from django.core.mail import send_mail
 from celery import shared_task
+from environs import Env
+
+from django_project import celery_app
+
+
+env = Env()
+env.read_env()
 
 
 # Test purpose
@@ -17,7 +23,7 @@ def send_feedback_email_task(email_address, message):
     send_mail(
         "Your Feedback",
         f"\t{message}\n\nThank you!",
-        "tableway@monkey.com",
+        env("EMAIL_ADDRESS"),
         [email_address],
         fail_silently=False,
     )
