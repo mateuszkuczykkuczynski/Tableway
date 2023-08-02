@@ -2,7 +2,7 @@ from time import sleep
 from django.core.mail import send_mail
 from celery import shared_task
 from environs import Env
-
+from django_project.settings import EMAIL_HOST_USER
 from django_project import celery_app
 
 
@@ -17,13 +17,13 @@ def debug_task(self):
 
 
 @shared_task()
-def send_feedback_email_task(email_address, message):
+def send_feedback_email_task(message):
     """Sends an email when the feedback form has been submitted."""
     sleep(10)  # Simulate operation time that Django needs synchronously
     send_mail(
         "Your Feedback",
         f"\t{message}\n\nThank you!",
-        env("EMAIL_ADDRESS"),
-        [email_address],
+        EMAIL_HOST_USER,
+        ['misk0005@wp.pl'],
         fail_silently=False,
     )
