@@ -15,6 +15,9 @@ from .permissions import (IsRestaurantEmployeeOrOwnerOrAdmin, IsOwnerOrAdminOfPa
 
 
 class CreatePaymentView(CreateAPIView):
+    """
+    Class allows to create a payment object if person has an appropriate permission
+    """
     serializer_class = CreatePaymentForReservationSerializer
     permission_classes = (IsRestaurantEmployeeOrOwnerOrAdmin,)
 
