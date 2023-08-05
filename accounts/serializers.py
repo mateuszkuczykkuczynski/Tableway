@@ -10,6 +10,19 @@ User = get_user_model()
 
 
 class CustomRegistration(RegisterSerializer):
+    """
+    CustomRegistration extends the RegisterSerializer to handle the registration of new users,
+    including those who are registering as a restaurant.
+
+    It includes additional fields related to the user and restaurant details. If the user is a restaurant,
+    it creates a new Restaurant instance and associated Table instances based on the provided details.
+
+    It also sends a feedback email after successful registration.
+
+    Validation:
+    - If registering as a restaurant, restaurant-related fields are required.
+    - If not registering as a restaurant, restaurant-related fields should not be provided.
+    """
 
     name = serializers.CharField(required=False)
     surname = serializers.CharField(required=False)
@@ -99,7 +112,14 @@ class CustomRegistration(RegisterSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    UserSerializer is a ModelSerializer for the User model.
 
+    It includes the 'name' and 'surname' fields in the serialized representation.
+    This serializer is used when we need to convert User model instances to JSON,
+    or validate User data when deserialized into a Python object.
+    """
+    
     class Meta:
         model = User
         fields = ("name", "surname",)
