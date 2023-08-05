@@ -10,6 +10,17 @@ User = get_user_model()
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, DestroyModelMixin, PutOnlyMixin, GenericViewSet):
+    """
+        UserViewSet is a DRF ViewSet for the User model. It supports the following operations:
+        - Retrieve: Get a specific User.
+        - List: Get all Users.
+        - Destroy: Delete a User.
+        - Put: Update a User.
+
+        Permissions: Only the owner of a User or an admin can perform operations.
+
+        URL pattern: '/users/{id}/' with 'user' as the base name.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsOwnerOrAdmin,)
