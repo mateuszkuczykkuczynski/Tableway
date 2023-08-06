@@ -1,3 +1,5 @@
+from abc import ABC
+
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -9,7 +11,7 @@ from .tasks import send_feedback_email_task
 User = get_user_model()
 
 
-class CustomRegistration(RegisterSerializer):
+class CustomRegistration(RegisterSerializer, ABC):
     """
     CustomRegistration extends the RegisterSerializer to handle the registration of new users,
     including those who are registering as a restaurant.
@@ -119,7 +121,7 @@ class UserSerializer(serializers.ModelSerializer):
     This serializer is used when we need to convert User model instances to JSON,
     or validate User data when deserialized into a Python object.
     """
-    
+
     class Meta:
         model = User
         fields = ("name", "surname",)

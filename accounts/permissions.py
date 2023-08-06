@@ -6,7 +6,13 @@ User = get_user_model()
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     """
-    Custom permission to only allow owners of an object and admins to edit or delete it.
+    IsOwnerOrAdmin is a custom permission class that restricts access to authenticated users and only allows owners of
+    an object or admins to edit or delete it.
+
+    The 'has_permission' method checks if the user is authenticated, allowing them to see the list view.
+
+    The 'has_object_permission' method allows safe methods (GET, HEAD, OPTIONS) for all users.
+    Write permissions (PUT, PATCH, DELETE) are only granted if the user is the owner of the object.
     """
 
     def has_permission(self, request, view):

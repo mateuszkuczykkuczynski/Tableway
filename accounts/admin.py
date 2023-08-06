@@ -6,6 +6,18 @@ from .models import CustomUser
 
 
 class CustomUserAdmin(UserAdmin):
+    """
+    CustomUserAdmin extends the default UserAdmin to handle the administration of the CustomUser model in the Django
+    admin interface.
+
+    It uses the CustomUserCreationForm and CustomUserChangeForm for creating and updating CustomUser instances,
+    respectively.
+
+    The list_display attribute defines the fields that will be displayed in the user list in the admin interface.
+
+    The fieldsets and add_fieldsets attributes define the layout of the change and add forms in the admin interface.
+    They include the default User fields as well as the additional fields defined in the CustomUser model.
+    """
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
