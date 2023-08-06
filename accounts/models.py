@@ -3,6 +3,20 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
+    """
+    CustomUser extends the default AbstractUser model to include additional fields related to the user and restaurant
+    details.
+
+    It includes standard user fields like 'name' and 'surname', as well as fields specific to restaurants,
+    such as 'restaurant_name', 'restaurant_address', and 'restaurant_type'.
+
+    If a user is a restaurant ('is_restaurant' is True), these additional fields store the details of the restaurant.
+    The 'two_seats_tables', 'four_seats_tables', and 'more_than_four_seats_tables' fields store the number of tables of
+    each type in the restaurant.
+
+    The 'restaurant_country' and 'restaurant_city' fields are foreign keys to the 'Country' and 'City' models from the
+    'cities_light' app (library), respectively.
+    """
     RESTAURANT_TYPES = [
         ('asian', 'Asian'),
         ('mexican', 'Mexican'),

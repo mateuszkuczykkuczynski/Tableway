@@ -9,6 +9,26 @@ User = get_user_model()
 
 
 class UserTests(APITestCase):
+    """
+    A set of tests for the User model and its associated API endpoints in a Django REST Framework application.
+
+    The tests cover the following scenarios:
+
+    - User Model: Verifies that the user model correctly stores data.
+    - Restaurant and Table Models: Checks if restaurant and table models are automatically created and correctly
+      associated with the user.
+    - API List View: Checks the status codes returned when accessing the user list view endpoint, both authenticated
+      and unauthenticated. Verifies that the endpoint returns the correct number of users and the correct user data.
+    - API Detail View: Checks the status codes returned when accessing a specific user's detail view endpoint, both
+      authenticated and unauthenticated. Verifies that the endpoint returns the correct user data.
+    - API Update (PUT): Checks the status codes returned when trying to update a user's data, both authorized and
+      unauthorized. Verifies that the update operation correctly modifies the user's data and handles different
+      data types and null values.
+    - API Delete: Checks the status codes returned when trying to delete a user, both authenticated and unauthenticated.
+      Verifies that the delete operation correctly removes the user from the database.
+
+    Each test is a method within this class and follows the naming convention 'test_{description_of_test}'.
+    """
     @classmethod
     def setUpTestData(cls):
         cls.user1 = get_user_model().objects.create_user(
