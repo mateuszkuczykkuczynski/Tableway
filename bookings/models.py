@@ -9,6 +9,9 @@ from payments.models import Tip
 
 
 class Restaurant(models.Model):
+    """
+    Represents a restaurant with details like name, address, type, tables, and employees.
+    """
     owner = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     country = models.ForeignKey('cities_light.Country', on_delete=models.SET_NULL, null=True, blank=True)
@@ -24,6 +27,10 @@ class Restaurant(models.Model):
 
 
 class Employee(CustomUser):
+    """
+    Represents an employee in a restaurant with details on served reservations, workplace, and tips.
+    Includes a method to calculate daily, monthly, and overall tips.
+    """
     reservation_served = models.ForeignKey("bookings.Reservation", on_delete=models.SET_NULL, null=True, blank=True)
     works_in = models.ForeignKey("bookings.Restaurant", on_delete=models.SET_NULL, null=True, blank=True)
     account_number = models.CharField(max_length=28)
@@ -52,6 +59,10 @@ class Employee(CustomUser):
 
 
 class Reservation(models.Model):
+    """
+    Represents a table reservation with details on timing, table, payment status, and associated service employee.
+    Overrides the save method to compute the reservation end time.
+    """
     reserved_time = models.DateTimeField(null=True, blank=True)
     duration = models.IntegerField(null=True, blank=True)  # minutes
     reserved_time_end = models.DateTimeField(null=True, blank=True, default=datetime.now)
@@ -69,6 +80,10 @@ class Reservation(models.Model):
 
 
 class Table(models.Model):
+    """
+    Represents a restaurant table with details on location, capacity, and reservation status.
+    Includes a method to check reservation status for a given date range.
+    """
     location = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='tables')
     capacity = models.IntegerField()
     is_reserved = models.BooleanField(default=False)

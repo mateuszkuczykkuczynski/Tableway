@@ -9,7 +9,7 @@ User = get_user_model()
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     """
-    Custom permission to only allow owners of an object and admins to edit or delete it.
+    Permission to allow only object owners and admins to modify it. All authenticated users can view.
     """
 
     def has_permission(self, request, view):
@@ -32,7 +32,7 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 
 class IsOwnerOrAdminGET(permissions.BasePermission):
     """
-    Custom permission to only allow owners of an object and admins to edit or delete it.
+    Permission to allow only object owners to view it when using safe methods (GET, HEAD, OPTIONS).
     """
 
     def has_permission(self, request, view):
@@ -53,7 +53,7 @@ class IsOwnerOrAdminGET(permissions.BasePermission):
 
 class IsOwnerOrAdminPUT(permissions.BasePermission):
     """
-    Custom permission to only allow owners of an object and admins to edit or delete it.
+    Permission to allow only object owners and associated service users to modify it. All can view using safe methods.
     """
 
     def has_permission(self, request, view):
@@ -76,7 +76,7 @@ class IsOwnerOrAdminPUT(permissions.BasePermission):
 
 class IsOwnerOrAdminAddService(permissions.BasePermission):
     """
-    Custom permission to only allow owners of an object and admins to edit or delete it.
+    Permission to allow only object owners and associated service users to modify it. All can view using safe methods.
     """
 
     def has_permission(self, request, view):
@@ -99,7 +99,7 @@ class IsOwnerOrAdminAddService(permissions.BasePermission):
 
 class IsOwnerOrAdminGetList(permissions.BasePermission):
     """
-    Custom permission to only allow owners of an object and admins to edit or delete it.
+    Permission to allow only restaurant owners to view the list of objects associated with their restaurant.
     """
 
     def has_permission(self, request, view):
@@ -114,7 +114,7 @@ class IsOwnerOrAdminGetList(permissions.BasePermission):
 
 class IsOwnerOrAdminUserReservations(permissions.BasePermission):
     """
-    Custom permission to only allow owners of an object and admins to edit or delete it.
+    Permission to allow only reservation owners to view their reservations using safe methods.
     """
 
     def has_object_permission(self, request, view, obj):
