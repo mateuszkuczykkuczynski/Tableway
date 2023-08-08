@@ -3,6 +3,16 @@ import random
 
 
 class Payment(models.Model):
+    """
+    Represents a payment made for a reservation.
+
+    Attributes:
+        - reservation: The reservation for which the payment is made.
+        - amount: The total amount of the payment.
+        - secret: A unique secret code for the payment.
+        - checkout_url: URL for the payment checkout (for future use).
+        - completed: Indicates if the payment is completed or not.
+    """
     reservation = models.ForeignKey('bookings.Reservation', on_delete=models.SET_NULL, related_name='payments',
                                     null=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
@@ -31,6 +41,18 @@ class Payment(models.Model):
 
 
 class Tip(models.Model):
+    """
+    Represents a tip given to an employee for a reservation.
+
+    Attributes:
+        - employee: The employee who received the tip.
+        - reservation: The reservation for which the tip is given.
+        - amount: The total amount of the tip.
+        - secret: A unique secret code for the tip.
+        - checkout_url: URL for the tip checkout (for future use).
+        - received: Indicates if the tip has been received or not.
+        - date: The date and time when the tip was given.
+    """
     employee = models.ForeignKey('bookings.Employee', on_delete=models.SET_NULL, related_name='received_tips',
                                  null=True)
     reservation = models.ForeignKey('bookings.Reservation', on_delete=models.SET_NULL, related_name='tips', null=True)
