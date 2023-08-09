@@ -11,6 +11,28 @@ User = get_user_model()
 
 
 class ReservationSystemTests(APITestCase):
+    """
+    A set of tests for the Reservation system, focusing on the interactions of various models and their associated API endpoints.
+
+    The tests cover the following scenarios:
+
+    - **Available Tables**: Validates the API's ability to list available tables.
+    - **Table Details**: Checks the API's ability to provide details for a specific table.
+    - **Now Available Tables**: Verifies the API's ability to list tables that are currently available.
+    - **Table Reservation**: Tests the reservation of a specific table through the API.
+    - **Cancel Table Reservation**: Validates the API's ability to cancel a specific table reservation.
+    - **Reservation Details**: Checks the API's ability to provide details for a specific reservation.
+    - **Reservation Payment Status**: Verifies the payment status of a specific reservation.
+    - **Reservation Add Service**: Tests the API's ability to add a service to a specific reservation.
+    - **All Restaurant Reservations**: Validates the API's ability to list all reservations for a specific restaurant.
+    - **All User Reservations**: Checks the API's ability to list all reservations for a specific user.
+    - **Employee Creation**: (To be tested) Verifies the API's ability to create a new employee.
+    - **Employee Details**: (To be tested) Checks the API's ability to provide details for a specific employee.
+    - **All Restaurant Employees**: (To be tested) Validates the API's ability to list all employees for a specific restaurant.
+    - **All Employee Reservations**: (To be tested) Tests the API's ability to list all reservations served by a specific employee.
+
+    Each test is a method within this class and follows the naming convention 'test_{description_of_test}'.
+    """
 
     @classmethod
     def setUpTestData(cls):
