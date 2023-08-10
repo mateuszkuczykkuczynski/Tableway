@@ -17,6 +17,9 @@ from .permissions import (IsOwnerOrAdmin, IsOwnerOrAdminGET, IsOwnerOrAdminPUT, 
 
 
 class AvailableTablesView(ListAPIView):
+    """
+    API view to list all available tables based on various filters such as restaurant name, type, capacity, and city.
+    """
     serializer_class = TableSerializer
 
     def get_queryset(self):
@@ -39,6 +42,9 @@ class AvailableTablesView(ListAPIView):
 
 
 class NowAvailableTablesView(ListAPIView):
+    """
+    API view to list tables that are currently available, filtered by capacity and city.
+    """
     serializer_class = TableSerializer
 
     def get_queryset(self):
@@ -59,11 +65,17 @@ class NowAvailableTablesView(ListAPIView):
 
 
 class TableDetailsView(RetrieveAPIView):
+    """
+    API view to retrieve details for a specific table.
+    """
     queryset = Table.objects.all()
     serializer_class = TableSerializer
 
 
 class TableReservationView(CreateAPIView):
+    """
+    API view to allow users to reserve a specific table. It checks for table availability before confirming the reservation.
+    """
     queryset = Table.objects.all()
 
     def get_serializer_class(self):
@@ -89,11 +101,17 @@ class TableReservationView(CreateAPIView):
 
 
 class CancelTableReservationView(DestroyAPIView):
+    """
+    API view to allow users to cancel a specific table reservation.
+    """
     queryset = Reservation.objects.all()
     permission_classes = (IsOwnerOrAdmin,)
 
 
 class ReservationDetailsView(RetrieveAPIView):
+    """
+    API view to retrieve details for a specific reservation.
+    """
     queryset = Reservation.objects.all()
     serializer_class = ReservationDetailsSerializer
     permission_classes = (IsOwnerOrAdminGET,)
@@ -101,12 +119,19 @@ class ReservationDetailsView(RetrieveAPIView):
 
 
 class ReservationPaymentStatusView(UpdateAPIView):
+    """
+    API view to update the payment status of a specific reservation.
+    """
     serializer_class = ReservationPaymentStatusSerializer
     queryset = Reservation.objects.all()
     permission_classes = (IsOwnerOrAdminPUT,)
 
 
 class AllUserReservationsView(ListAPIView):
+    """
+    API view to list all reservations for a specific user. Raises a permission error if the requester is not the user
+    or an admin.
+    """
     serializer_class = UserReservationsListSerializer
     permission_classes = (IsOwnerOrAdminUserReservations,)  # Not needed, solved from in queryset (temporary solution)
 
@@ -123,6 +148,9 @@ class AllUserReservationsView(ListAPIView):
 
 
 class AllRestaurantReservationsView(ListAPIView):
+    """
+    API view to list all reservations for a specific restaurant, with an optional filter for a specific date.
+    """
     serializer_class = RestaurantReservationsListSerializer
     permission_classes = (IsOwnerOrAdminGetList,)
 
@@ -142,12 +170,19 @@ class AllRestaurantReservationsView(ListAPIView):
 
 
 class ReservationAddServiceView(UpdateAPIView):
+    """
+    API view to allow adding a service to a specific reservation.
+    """
     queryset = Reservation.objects.all()
     serializer_class = AddEmployeeToReservationSerializer
     permission_classes = (IsOwnerOrAdminAddService,)
 
 
 class EmployeeCreateView(CreateAPIView):
+    """
+    API view to create a new employee. It checks for permissions to ensure only the restaurant owner or a superuser
+    can add an employee to a restaurant.
+    """
     queryset = Employee.objects.all()
 
     def get_serializer_class(self):
@@ -161,12 +196,18 @@ class EmployeeCreateView(CreateAPIView):
 
 
 class EmployeeDetailsView(RetrieveAPIView):
+    """
+    API view to retrieve details for a specific employee.
+    """
     queryset = Employee.objects.all()
     serializer_class = EmployeeDetailsSerializer
     lookup_field = 'pk'
 
 
 class AllRestaurantEmployeesView(ListAPIView):
+    """
+    API view to list all employees for a specific restaurant.
+    """
     serializer_class = EmployeesListSerializer
 
     def get_queryset(self):
@@ -180,6 +221,9 @@ class AllRestaurantEmployeesView(ListAPIView):
 
 
 class AllEmployeeReservationsView(ListAPIView):
+    """
+    API view to list all reservations served by a specific employee.
+    """
     serializer_class = ReservationDetailsSerializer
 
     def get_queryset(self):
