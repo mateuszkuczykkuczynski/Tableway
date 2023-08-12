@@ -18,4 +18,6 @@ Actually working on app basics.
 - Now working on last test phase (last touches on tests).
 - Celery will be added as a new feature in near future! (working on that now).
 - Full docker deployment will be ready soon. 
-Last test phase on basic funcionility is complete. Now working on Celery and Redis. 
+Last test phase on basic funcionility is complete. Now working on Celery and Redis.
+Test phase is successfully ended.
+Readis and Celery is also added but couple of fixes is needed. After that next phase will start which is deployment!
