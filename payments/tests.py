@@ -8,8 +8,10 @@ from bookings.models import Employee, Restaurant, Table, Reservation
 
 
 class PaymentSystemTests(APITestCase):
+    """Test setup for the payment system."""
     @classmethod
     def setUpTestData(cls):
+        """Set up test data for users, restaurants, tables, reservations, payments, and tips."""
         cls.user1 = get_user_model().objects.create_user(
             username="testuser1",
             email="testuser1@gmail.com",
