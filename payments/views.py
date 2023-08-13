@@ -15,9 +15,7 @@ from .permissions import (IsRestaurantEmployeeOrOwnerOrAdmin, IsOwnerOrAdminOfPa
 
 
 class CreatePaymentView(CreateAPIView):
-    """
-    Class allows to create a payment object if person has an appropriate permission
-    """
+    """Allows creating a payment object with appropriate permissions."""
     serializer_class = CreatePaymentForReservationSerializer
     permission_classes = (IsRestaurantEmployeeOrOwnerOrAdmin,)
 
@@ -43,6 +41,7 @@ class CreatePaymentView(CreateAPIView):
 
 
 class CompletePaymentView(UpdateAPIView):
+    """Allows completing a payment."""
     serializer_class = CompletePaymentSerializer
     permission_classes = (IsOwnerOrAdminOfPayment,)
     lookup_field = 'id'
@@ -52,6 +51,7 @@ class CompletePaymentView(UpdateAPIView):
 
 
 class AllRestaurantReservationsPaymentsView(ListAPIView):
+    """Lists all payments for a restaurant's reservations."""
     serializer_class = PaymentsDetailsSerializer
     permission_classes = (IsRestaurantOwnerOrAdmin,)
 
@@ -62,6 +62,7 @@ class AllRestaurantReservationsPaymentsView(ListAPIView):
 
 
 class AllUserReservationsPaymentsView(ListAPIView):
+    """Lists all payments for a user's reservations."""
     serializer_class = PaymentsDetailsSerializer
     permission_classes = (IsOwnerOrAdminOfUserReservations,)
 
@@ -71,6 +72,7 @@ class AllUserReservationsPaymentsView(ListAPIView):
 
 
 class TipEmployeeView(CreateAPIView):
+    """Allows tipping an employee."""
     serializer_class = TipEmployeeSerializer
     permission_classes = (CanPerformTipCreation,)
 
@@ -92,6 +94,7 @@ class TipEmployeeView(CreateAPIView):
 
 
 class AllUserTipsView(ListAPIView):
+    """Lists all tips given by a user."""
     serializer_class = AllUserTipsSerializer
     permission_classes = (IsTipsCreatorOrAdmin,)
 
@@ -107,6 +110,7 @@ class AllUserTipsView(ListAPIView):
 
 
 class AllEmployeeTipsView(ListAPIView):
+    """Lists all tips received by an employee."""
     serializer_class = AllEmployeeTipsSerializer
     permission_classes = (IsTipsOwnerOrAdmin,)
 
@@ -117,6 +121,7 @@ class AllEmployeeTipsView(ListAPIView):
 
 
 class AllRestaurantTipsView(ListAPIView):
+    """Lists all tips given in a restaurant."""
     serializer_class = AllRestaurantTipsSerializer
     permission_classes = (IsRestaurantOwnerOrAdmin,)
 
