@@ -15,14 +15,14 @@ env.read_env()
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
-
+# In work
 @shared_task()
-def send_feedback_email_task(message):
-    """Sends an email when the feedback form has been submitted."""
+def send_feedback_email_after_account_creation_task(message):
+    """Sends an email when user creates an account."""
     sleep(10)  # Simulate operation time that Django needs synchronously
     send_mail(
-        "Your Feedback",
-        f"\t{message}\n\nThank you!",
+        "Hi,",
+        f"\t{message}\n\nThank you for choosing best restaurant app in the world... no in the galaxy!",
         EMAIL_HOST_USER,
         ['misk0005@wp.pl'],
         fail_silently=False,
