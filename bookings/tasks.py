@@ -15,14 +15,16 @@ env.read_env()
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
+
 # In work
 @shared_task()
-def send_feedback_email_after_tip_task(email_address, message):
+def send_feedback_email_table_booking_task(email_address, message, restaurant_name):
     """Sends an email when the feedback form has been submitted."""
     sleep(10)  # Simulate operation time that Django needs synchronously
     send_mail(
         "Hi",
-        f"\t{message}\n\nYou just tipped somebody, you da best! Thanks for choosing Tableway!",
+        f"\t{message}\n\nYou have booked a table in {restaurant_name}, we hope you enjoyed using Tableway! "
+        f"Thanks for choosing us!",
         env("EMAIL_ADDRESS"),
         [email_address],
         fail_silently=False,

@@ -15,6 +15,7 @@ env.read_env()
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
+
 # In work
 @shared_task()
 def send_feedback_email_after_account_creation_task(message):
