@@ -12,6 +12,7 @@ from .serializers import (CreatePaymentForReservationSerializer, PaymentsDetails
 from .permissions import (IsRestaurantEmployeeOrOwnerOrAdmin, IsOwnerOrAdminOfPayment, IsRestaurantOwnerOrAdmin,
                           IsTipsCreatorOrAdmin, IsOwnerOrAdminOfUserReservations,
                           CanPerformTipCreation, IsTipsOwnerOrAdmin)
+from .tasks import send_feedback_email_after_tip_task, send_feedback_email_after_payment_task
 
 
 class CreatePaymentView(CreateAPIView):
@@ -33,6 +34,7 @@ class CreatePaymentView(CreateAPIView):
         reservation_id = serializer.validated_data['reservation_choice'].id
         amount = serializer.validated_data['amount']
         Payment.objects.create(reservation_id=reservation_id, amount=amount)
+        send_feedback_email_after_payment_task.delay()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -90,6 +92,7 @@ class TipEmployeeView(CreateAPIView):
 
         if Tip.objects.filter(reservation=reservation).exists():
             raise ValidationError("A tip for this reservation already exists.")
+        send_feedback_email_after_tip_task.delay()
         serializer.save(reservation=reservation)
 
 

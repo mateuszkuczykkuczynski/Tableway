@@ -14,6 +14,7 @@ from .serializers import (TableSerializer, ReservationSerializerEditableFields, 
                           RestaurantReservationsListSerializer, ReservationPaymentStatusSerializer)
 from .permissions import (IsOwnerOrAdmin, IsOwnerOrAdminGET, IsOwnerOrAdminPUT, IsOwnerOrAdminAddService,
                           IsOwnerOrAdminGetList, IsOwnerOrAdminUserReservations)
+from .tasks import send_feedback_email_table_booking_task
 
 
 class AvailableTablesView(ListAPIView):
@@ -74,7 +75,8 @@ class TableDetailsView(RetrieveAPIView):
 
 class TableReservationView(CreateAPIView):
     """
-    API view to allow users to reserve a specific table. It checks for table availability before confirming the reservation.
+    API view to allow users to reserve a specific table. It checks for table availability before confirming
+    the reservation.
     """
     queryset = Table.objects.all()
 
@@ -96,6 +98,7 @@ class TableReservationView(CreateAPIView):
             table.reservation.add(reservation)
             table.is_reserved = True
             table.save()
+            send_feedback_email_table_booking_task.delay()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
