@@ -1,3 +1,32 @@
+Tableway: Restaurant Booking & Payment System 🍽️
+
+Tableway is a comprehensive restaurant management system built with Django and Django Rest Framework. It streamlines the process of making reservations, handling payments, and managing restaurant operations.
+
+Features 🌟
+
+1. User Authentication
+Secure user registration and login functionality.
+Distinct roles for customers, restaurant owners, and employees.
+2. Reservation Management
+Users can make, view, and manage their reservations.
+Real-time table availability checks.
+3. Payment System
+Integrated payment system allowing users to make payments for their reservations.
+Secure transaction processing.
+4. Tip Management
+Users can give tips to employees.
+Employees can view and manage their tips.
+5. Admin Dashboard
+Comprehensive admin functionalities for managing restaurant details, tables, and employees.
+Real-time data visualization for better decision-making.
+Technologies Used 🛠️
+
+Backend: Django, Django Rest Framework
+Database: PostgreSQL
+Task Queue: Celery (for asynchronous tasks)
+Others: Redis, Docker
+
+
 # Tableway
 ### more details soon ###
 Actually working on app basics. 
