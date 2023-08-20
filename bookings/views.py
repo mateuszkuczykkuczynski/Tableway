@@ -77,6 +77,9 @@ class TableReservationView(CreateAPIView):
     """
     API view to allow users to reserve a specific table. It checks for table availability before confirming
     the reservation.
+
+    Upon successful reservation, a Celery task (`send_feedback_email_table_booking_task`) is triggered to
+    handle asynchronous operations related to the reservation, such as sending feedback emails.
     """
     queryset = Table.objects.all()
 
