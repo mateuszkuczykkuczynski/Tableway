@@ -16,7 +16,12 @@ from .tasks import send_feedback_email_after_tip_task, send_feedback_email_after
 
 
 class CreatePaymentView(CreateAPIView):
-    """Allows creating a payment object with appropriate permissions."""
+    """
+    Allows creating a payment object with appropriate permissions.
+
+    After a successful payment creation, a Celery task (`send_feedback_email_after_payment_task`) is triggered
+    to handle asynchronous operations related to the payment, such as sending feedback emails.
+    """
     serializer_class = CreatePaymentForReservationSerializer
     permission_classes = (IsRestaurantEmployeeOrOwnerOrAdmin,)
 
@@ -74,7 +79,12 @@ class AllUserReservationsPaymentsView(ListAPIView):
 
 
 class TipEmployeeView(CreateAPIView):
-    """Allows tipping an employee."""
+    """
+    Allows tipping an employee.
+
+    After successfully tipping an employee, a Celery task (`send_feedback_email_after_tip_task`) is triggered
+    to handle asynchronous operations related to the tip, such as sending feedback emails.
+    """
     serializer_class = TipEmployeeSerializer
     permission_classes = (CanPerformTipCreation,)
 
