@@ -1,0 +1,18 @@
+# Working on that one
+
+# Testing
+pytest==x.x.x
+pytest-django==x.x.x
+pytest-cov==x.x.x
+
+# Linting and Formatting
+flake8==x.x.x
+black==x.x.x
+isort==x.x.x
+mypy==x.x.x
+
+# Debugging
+django-debug-toolbar==x.x.x
+
+# Include the main requirements
+-r requirements.txt
