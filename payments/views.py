@@ -39,6 +39,7 @@ class CreatePaymentView(CreateAPIView):
         reservation_id = serializer.validated_data['reservation_choice'].id
         amount = serializer.validated_data['amount']
         Payment.objects.create(reservation_id=reservation_id, amount=amount)
+        # Working on passing variables into celery task in "the most efficient" way.
         send_feedback_email_after_payment_task.delay()
 
     def get_serializer_context(self):
@@ -102,6 +103,7 @@ class TipEmployeeView(CreateAPIView):
 
         if Tip.objects.filter(reservation=reservation).exists():
             raise ValidationError("A tip for this reservation already exists.")
+        # Working on passing variables into celery task in "the most efficient" way.
         send_feedback_email_after_tip_task.delay()
         serializer.save(reservation=reservation)
 
