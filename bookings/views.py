@@ -101,6 +101,7 @@ class TableReservationView(CreateAPIView):
             table.reservation.add(reservation)
             table.is_reserved = True
             table.save()
+            # Working on passing variables into celery task in "the most efficient" way.
             send_feedback_email_table_booking_task.delay()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
