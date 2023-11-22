@@ -144,4 +144,3 @@ class AllRestaurantTipsView(ListAPIView):
         restaurant_id = self.kwargs['restaurant_id']
         queryset = Tip.objects.filter(reservation__table_number__location=restaurant_id)
         return queryset
-
