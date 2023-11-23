@@ -50,3 +50,4 @@ Actually working on app basics.
 Last test phase on basic funcionility is complete. Now working on Celery and Redis.
 Test phase is successfully ended.
 Readis and Celery is also added but couple of fixes is needed. After that next phase will start which is deployment!
+Add black as formatter to project.
