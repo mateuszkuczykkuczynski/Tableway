@@ -13,6 +13,7 @@ class RestaurantAdmin(admin.ModelAdmin):
     inlines = [TableInline]
 
 
+# Rest of models will also be displayed better, maybe jazzmin will be used for admin panel creation
 admin.site.register(Restaurant)
 admin.site.register(Table)
 admin.site.register(Reservation)
