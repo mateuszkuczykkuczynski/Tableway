@@ -14,6 +14,8 @@ Including another URLconf
     1. Import to include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# This one needs refactor and new approach so functional urls will be
+# separate from build in ones.
 from django.contrib import admin
 from django.urls import path, include, re_path
 from drf_spectacular.views import (SpectacularAPIView, SpectacularSwaggerView)
